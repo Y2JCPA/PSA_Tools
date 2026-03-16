@@ -434,23 +434,23 @@ body {
     <div class="israel-relief-row">
       <div class="checkbox-row-prominent">
         <input type="checkbox" id="gs-israel">
-        <label for="gs-israel">🇮🇱 Taxpayer in Israel — IRS Terror Relief (Notice 2023-71 / 2024-34 / 2024-51)</label>
+        <label for="gs-israel">🇮🇱 Taxpayer in Israel — IRS Terror Relief (Notice 2023-71 / 2024-34 / 2025-53)</label>
       </div>
       <div id="gs-israel-box" class="israel-relief-box">
         <h4>IRS Terror Relief — Postponed Deadlines</h4>
         <p>Three IRS notices provide relief for taxpayers affected by the October 7, 2023 terrorist attacks in Israel:</p>
         <ul>
           <li class="notice-item"><strong>Notice 2023-71</strong> (Oct 2023): Initial postponement — deadlines falling on or after Oct 7, 2023 postponed to Oct 7, 2024.</li>
-          <li class="notice-item"><strong>Notice 2024-34</strong> (Mar 2024): Extended the postponement period through Oct 7, 2024 (same end date, expanded scope).</li>
-          <li class="notice-item"><strong>Notice 2024-51</strong> (Jul 2024): Further extended <strong>all</strong> postponed deadlines to <strong>September 30, 2025</strong>.</li>
+          <li class="notice-item"><strong>Notice 2024-34</strong> (Mar 2024): Extended the postponement period and expanded scope of relief.</li>
+          <li class="notice-item"><strong>Notice 2025-53</strong> (2025): Further extended <strong>all</strong> postponed deadlines to <strong>September 30, 2026</strong>.</li>
         </ul>
-        <p><strong>Effect:</strong> If the original due date (or extended due date) falls between <strong>Oct 7, 2023</strong> and <strong>Sept 30, 2025</strong>, the effective due date for both filing and payment becomes <strong>Sept 30, 2025</strong>. No penalties or interest accrue until after that date.</p>
+        <p><strong>Effect:</strong> If the original due date (or extended due date) falls between <strong>Oct 7, 2023</strong> and <strong>Sept 30, 2026</strong>, the effective due date for both filing and payment becomes <strong>Sept 30, 2026</strong>. No penalties or interest accrue until after that date.</p>
         <div class="covered-list">
           <strong>Covered deadlines:</strong> Filing returns, paying tax, estimated tax payments, FBAR/FATCA filing deadlines, and other time-sensitive acts.
         </div>
       </div>
       <div id="gs-israel-green" class="israel-green-msg">
-        ✓ No penalties or interest — within Israel terror relief period (deadline extended to Sept 30, 2025)
+        ✓ No penalties or interest — within Israel terror relief period (deadline extended to Sept 30, 2026)
       </div>
     </div>
   </div>
@@ -643,7 +643,7 @@ const DEFAULT_RATE = 7;
 
 // Israel terror relief constants
 const ISRAEL_RELIEF_START = new Date('2023-10-07T00:00:00');
-const ISRAEL_RELIEF_END = new Date('2025-09-30T00:00:00');
+const ISRAEL_RELIEF_END = new Date('2026-09-30T00:00:00');
 
 function getQuarterlyRate(date) {
   const y = date.getFullYear();
@@ -717,16 +717,16 @@ function getGlobalSettings() {
     // Payment deadline stays at original due date
   }
 
-  // Israel relief: if the due date falls in the relief window, extend to Sept 30, 2025
+  // Israel relief: if the due date falls in the relief window, extend to Sept 30, 2026
   let israelAppliesFile = false;
   let israelAppliesPay = false;
   if (israelRelief) {
     if (isInReliefWindow(filingDue)) {
-      filingDue = new Date('2025-09-30T00:00:00');
+      filingDue = new Date('2026-09-30T00:00:00');
       israelAppliesFile = true;
     }
     if (isInReliefWindow(paymentDue)) {
-      paymentDue = new Date('2025-09-30T00:00:00');
+      paymentDue = new Date('2026-09-30T00:00:00');
       israelAppliesPay = true;
     }
   }
@@ -825,7 +825,7 @@ function updateEffectiveDateDisplays() {
   const f2el = document.getElementById('f2-effective');
   if (gs.israelRelief) {
     f2el.innerHTML = '<div class="ed-label">Israel Terror Relief Active</div>' +
-      '<span class="ed-item">Estimated tax deadlines within the relief window (Oct 7, 2023 – Sept 30, 2025) are postponed to <strong>Sept 30, 2025</strong>.</span>';
+      '<span class="ed-item">Estimated tax deadlines within the relief window (Oct 7, 2023 – Sept 30, 2026) are postponed to <strong>Sept 30, 2026</strong>.</span>';
   } else {
     f2el.innerHTML = '<div class="ed-label">Tax Year ' + gs.year + '</div>' +
       '<span class="ed-item">Standard estimated tax deadlines apply.</span>';
@@ -891,7 +891,7 @@ function calcFiling() {
   const paymentDue = gs.paymentDue;
 
   // Check if Israel relief covers everything
-  if (gs.israelRelief && filed <= new Date('2025-09-30T00:00:00') && paid <= new Date('2025-09-30T00:00:00') &&
+  if (gs.israelRelief && filed <= new Date('2026-09-30T00:00:00') && paid <= new Date('2026-09-30T00:00:00') &&
       gs.israelAppliesFile && gs.israelAppliesPay) {
     el.innerHTML = '';
     document.getElementById('gs-israel-green').classList.add('visible');
@@ -1019,7 +1019,7 @@ function calcEstimated() {
 
   // If Israel relief, adjust due dates that fall within the relief window
   if (gs.israelRelief) {
-    const reliefDate = new Date('2025-09-30T00:00:00');
+    const reliefDate = new Date('2026-09-30T00:00:00');
     for (let i = 0; i < qDates.length; i++) {
       if (isInReliefWindow(qDates[i].due)) {
         qDates[i].originalDue = new Date(qDates[i].due);
@@ -1064,7 +1064,7 @@ function calcEstimated() {
 
     totalPenalty += interest;
     const dueDateLabel = qDates[i].israelPostponed
-      ? `${fmtDate(qDates[i].originalDue)} → <span class="ed-relief">Sept 30, 2025</span>`
+      ? `${fmtDate(qDates[i].originalDue)} → <span class="ed-relief">Sept 30, 2026</span>`
       : fmtDate(qDates[i].due);
     rows += `<tr>
       <td>${qDates[i].label}<br><span style="font-size:.75rem;color:var(--gray-400)">Due: ${dueDateLabel}</span></td>
@@ -1118,7 +1118,7 @@ function calcBalance() {
   }
 
   // Check Israel relief
-  if (gs.israelRelief && gs.israelAppliesPay && paid <= new Date('2025-09-30T00:00:00')) {
+  if (gs.israelRelief && gs.israelAppliesPay && paid <= new Date('2026-09-30T00:00:00')) {
     el.innerHTML = '';
     document.getElementById('gs-israel-green').classList.add('visible');
     el.classList.add('hidden');
