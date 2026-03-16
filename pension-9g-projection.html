@@ -127,8 +127,6 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
           <option value="401k">401(k) Distribution</option>
           <option value="pension">Pension (Defined Benefit Plan)</option>
           <option value="roth">Roth IRA Distribution</option>
-          <option value="ss">Social Security Benefits</option>
-          <option value="combo">Combination (enter total)</option>
         </select>
       </div>
     </div>
@@ -138,10 +136,10 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
         <input type="number" id="distribution" min="0" step="1" placeholder="0">
       </div>
     </div>
-    <div class="form-row ss-field" id="ssRow">
+    <div class="form-row ss-field" id="ssRow" style="display:none;">
       <div class="form-group input-prefix">
         <label for="ssAmount">Social Security Benefits Received</label>
-        <input type="number" id="ssAmount" min="0" step="1" placeholder="0">
+        <input type="number" id="ssAmount" min="0" step="1" placeholder="0" value="0">
       </div>
     </div>
   </div>
