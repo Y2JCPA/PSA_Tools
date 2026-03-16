@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partnership Withholding Calculator (8804/8805) — Philip Stein & Associates</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--blue:#1a5276;--blue-light:#2980b9;--blue-pale:#d4e6f1;--blue-bg:#eaf2f8;--gray-50:#f8f9fa;--gray-100:#f1f3f5;--gray-200:#e9ecef;--gray-300:#dee2e6;--gray-400:#ced4da;--gray-500:#adb5bd;--gray-600:#868e96;--gray-700:#495057;--gray-800:#343a40;--gray-900:#212529;--green:#27ae60;--green-bg:#eafaf1;--red:#c0392b;--red-bg:#fdedec;--orange:#e67e22;--orange-bg:#fef5e7;--radius:6px;--shadow:0 1px 3px rgba(0,0,0,.08)}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--gray-100);color:var(--gray-900);line-height:1.5;font-size:14px}
+.container{max-width:1100px;margin:0 auto;padding:16px}
+header{background:var(--blue);color:#fff;padding:20px 0;margin-bottom:20px}
+header .container{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+header h1{font-size:1.25rem;font-weight:600;letter-spacing:-.01em}
+header .subtitle{font-size:.8rem;opacity:.8;font-weight:400}
+.badge{background:rgba(255,255,255,.15);padding:3px 10px;border-radius:12px;font-size:.7rem;letter-spacing:.03em;text-transform:uppercase}
+.tabs{display:flex;gap:2px;background:var(--gray-200);border-radius:var(--radius) var(--radius) 0 0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tab{padding:10px 18px;cursor:pointer;font-size:.82rem;font-weight:500;color:var(--gray-600);border:none;background:none;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s}
+.tab:hover{color:var(--gray-800);background:var(--gray-100)}
+.tab.active{color:var(--blue);background:#fff;border-bottom-color:var(--blue)}
+.panel{display:none;background:#fff;border-radius:0 0 var(--radius) var(--radius);box-shadow:var(--shadow);padding:24px}
+.panel.active{display:block}
+.section{margin-bottom:24px}
+.section-title{font-size:.95rem;font-weight:600;color:var(--blue);margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid var(--blue-pale)}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:.75rem;font-weight:600;color:var(--gray-700);text-transform:uppercase;letter-spacing:.03em}
+.field input,.field select{padding:8px 10px;border:1px solid var(--gray-300);border-radius:var(--radius);font-size:.88rem;color:var(--gray-900);background:#fff;transition:border-color .15s}
+.field input:focus,.field select:focus{outline:none;border-color:var(--blue-light);box-shadow:0 0 0 3px rgba(26,82,118,.1)}
+.field input[type=number]{-moz-appearance:textfield}
+.field input::-webkit-outer-spin-button,.field input::-webkit-inner-spin-button{-webkit-appearance:none}
+.field .hint{font-size:.7rem;color:var(--gray-500)}
+.btn{padding:8px 18px;border-radius:var(--radius);font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue-light)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{opacity:.9}
+.btn-outline{background:#fff;color:var(--blue);border:1px solid var(--blue)}
+.btn-outline:hover{background:var(--blue-bg)}
+.btn-sm{padding:5px 12px;font-size:.75rem}
+.partner-card{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:16px;margin-bottom:14px;position:relative}
+.partner-card .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.partner-card .card-header h3{font-size:.88rem;font-weight:600;color:var(--gray-800)}
+.partner-card .remove-btn{background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:1.1rem;padding:2px 6px;border-radius:4px}
+.partner-card .remove-btn:hover{color:var(--red);background:var(--red-bg)}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.summary-card{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;text-align:center}
+.summary-card.highlight{background:var(--blue-bg);border-color:var(--blue-pale)}
+.summary-card.success{background:var(--green-bg);border-color:#a9dfbf}
+.summary-card.danger{background:var(--red-bg);border-color:#f5b7b1}
+.summary-card.warning{background:var(--orange-bg);border-color:#f9e79f}
+.summary-card .label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--gray-600);margin-bottom:4px}
+.summary-card .value{font-size:1.35rem;font-weight:700;color:var(--gray-900)}
+.summary-card.highlight .value{color:var(--blue)}
+.summary-card.success .value{color:var(--green)}
+.summary-card.danger .value{color:var(--red)}
+.summary-card.warning .value{color:var(--orange)}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{background:var(--blue);color:#fff;padding:8px 10px;text-align:left;font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em}
+td{padding:8px 10px;border-bottom:1px solid var(--gray-200)}
+tr:hover td{background:var(--gray-50)}
+.text-right{text-align:right}
+.text-center{text-align:center}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600}
+.tag-corp{background:#d5f5e3;color:#1e8449}
+.tag-indiv{background:#d4e6f1;color:#1a5276}
+.tag-loss{background:var(--orange-bg);color:var(--orange)}
+.quarters-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:8px}
+.quarter-field{display:flex;flex-direction:column;gap:4px}
+.quarter-field label{font-size:.72rem;font-weight:600;color:var(--gray-600)}
+.quarter-field input{padding:6px 8px;border:1px solid var(--gray-300);border-radius:var(--radius);font-size:.85rem}
+.quarter-field input:focus{outline:none;border-color:var(--blue-light);box-shadow:0 0 0 3px rgba(26,82,118,.1)}
+.ref-section{margin-bottom:20px}
+.ref-section h3{font-size:.9rem;color:var(--blue);margin-bottom:8px}
+.ref-section p,.ref-section li{font-size:.82rem;color:var(--gray-700);line-height:1.6}
+.ref-section ul{padding-left:18px}
+.ref-section li{margin-bottom:4px}
+.ref-section code{background:var(--gray-100);padding:1px 5px;border-radius:3px;font-size:.78rem}
+.disclaimer{background:var(--gray-50);border:1px solid var(--gray-300);border-radius:var(--radius);padding:14px;margin-top:20px;font-size:.72rem;color:var(--gray-600);line-height:1.6}
+.disclaimer strong{color:var(--gray-800)}
+.empty-state{text-align:center;padding:40px 20px;color:var(--gray-500)}
+.empty-state .icon{font-size:2rem;margin-bottom:8px}
+.empty-state p{font-size:.85rem}
+.installment-table th,.installment-table td{text-align:right}
+.installment-table th:first-child,.installment-table td:first-child{text-align:left}
+.toggle-group{display:flex;gap:0;border:1px solid var(--gray-300);border-radius:var(--radius);overflow:hidden;width:fit-content}
+.toggle-group button{padding:6px 14px;border:none;background:#fff;font-size:.78rem;cursor:pointer;font-weight:500;color:var(--gray-600);border-right:1px solid var(--gray-300);transition:all .15s}
+.toggle-group button:last-child{border-right:none}
+.toggle-group button.active{background:var(--blue);color:#fff}
+.input-mode-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.input-mode-row span{font-size:.75rem;color:var(--gray-600);font-weight:600;text-transform:uppercase}
+footer{text-align:center;padding:20px;font-size:.7rem;color:var(--gray-500)}
+@media print{
+  body{background:#fff;font-size:12px}
+  header{padding:10px 0;margin-bottom:10px}
+  .tabs,.btn,.remove-btn,.toggle-group,.field input,.field select{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .panel{box-shadow:none;border:1px solid var(--gray-300)}
+  .no-print{display:none!important}
+}
+@media(max-width:640px){
+  .container{padding:10px}
+  header .container{flex-direction:column;text-align:center}
+  .tabs{flex-wrap:nowrap}
+  .tab{padding:8px 12px;font-size:.75rem}
+  .panel{padding:14px}
+  .form-grid{grid-template-columns:1fr}
+  .summary-grid{grid-template-columns:1fr 1fr}
+  .quarters-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <div>
+      <h1>Partnership Withholding Calculator (8804/8805)</h1>
+      <div class="subtitle">Philip Stein &amp; Associates — Internal Tool</div>
+    </div>
+    <span class="badge">IRC §1446</span>
+  </div>
+</header>
+
+<div style="max-width:960px;margin:0 auto;padding:12px 16px 0;"><a href="index.html" style="display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;color:#1a5276;text-decoration:none;font-weight:500;padding:6px 12px;border:1px solid #aed6f1;border-radius:6px;background:#eaf2f8;transition:background .15s;" onmouseover="this.style.background='#d4e6f1'" onmouseout="this.style.background='#eaf2f8'">← All Tools</a></div>
+<div class="container">
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="partnership" role="tab">Partnership (8804)</button>
+    <button class="tab" data-tab="partners" role="tab">Partner Detail (8805)</button>
+    <button class="tab" data-tab="installments" role="tab">Installment Schedule (8813)</button>
+    <button class="tab" data-tab="reference" role="tab">Reference</button>
+  </div>
+
+  <!-- PARTNERSHIP TAB -->
+  <div class="panel active" id="panel-partnership">
+    <div class="section">
+      <div class="section-title">Partnership Information</div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="taxYear">Tax Year</label>
+          <input type="number" id="taxYear" min="2020" max="2030" value="2025">
+        </div>
+        <div class="field">
+          <label for="totalECTI">Total Partnership ECTI ($)</label>
+          <input type="text" id="totalECTI" placeholder="0.00" inputmode="decimal">
+          <span class="hint">Effectively connected taxable income</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Partnership-Level Summary (Form 8804)</div>
+      <div class="summary-grid" id="partnershipSummary">
+        <div class="summary-card highlight">
+          <div class="label">Foreign Partners</div>
+          <div class="value" id="sumPartnerCount">0</div>
+        </div>
+        <div class="summary-card highlight">
+          <div class="label">ECTI to Foreign Partners</div>
+          <div class="value" id="sumAllocECTI">$0</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">Total Withholding Required</div>
+          <div class="value" id="sumWithholding">$0</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">Total Installments Paid</div>
+          <div class="value" id="sumInstallments">$0</div>
+        </div>
+        <div class="summary-card" id="balanceCard">
+          <div class="label">Balance Due / (Overpayment)</div>
+          <div class="value" id="sumBalance">$0</div>
+        </div>
+        <div class="summary-card" id="penaltyCard">
+          <div class="label">Est. Underpayment Penalty</div>
+          <div class="value" id="sumPenalty">$0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Partner Withholding Breakdown</div>
+      <div id="partnerSummaryTable"></div>
+    </div>
+  </div>
+
+  <!-- PARTNERS TAB -->
+  <div class="panel" id="panel-partners">
+    <div class="section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div class="section-title" style="margin-bottom:0;border:none;padding:0">Foreign Partners (Form 8805)</div>
+        <button class="btn btn-primary no-print" onclick="addPartner()">+ Add Partner</button>
+      </div>
+      <div id="partnerList"></div>
+      <div id="emptyPartners" class="empty-state">
+        <div class="icon">&#128101;</div>
+        <p>No foreign partners added yet.<br>Click "Add Partner" to begin.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSTALLMENTS TAB -->
+  <div class="panel" id="panel-installments">
+    <div class="section">
+      <div class="section-title">Installment Payment Schedule (Form 8813)</div>
+      <p style="font-size:.82rem;color:var(--gray-600);margin-bottom:14px">
+        Estimated withholding tax is paid in 4 quarterly installments. Each installment equals 25% of the total estimated annual withholding.
+      </p>
+      <div id="installmentContent">
+        <div class="empty-state">
+          <div class="icon">&#128197;</div>
+          <p>Add partners on the Partner Detail tab to see the installment schedule.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFERENCE TAB -->
+  <div class="panel" id="panel-reference">
+    <div class="ref-section">
+      <h3>Section 1446 Overview</h3>
+      <ul>
+        <li><strong>IRC §1446</strong> requires US partnerships with foreign partners to withhold tax on each foreign partner's allocable share of <strong>effectively connected taxable income (ECTI)</strong>.</li>
+        <li>Withholding applies only to ECTI — not all partnership income. Items such as FDAP income (interest, dividends, rents, royalties) are subject to separate withholding under §1441/1442.</li>
+        <li>This withholding becomes a <strong>credit</strong> on the foreign partner's US tax return (Form 1040-NR for individuals, Form 1120-F for corporations).</li>
+      </ul>
+    </div>
+    <div class="ref-section">
+      <h3>Applicable Withholding Rates</h3>
+      <ul>
+        <li><strong>Non-corporate partners</strong> (individuals, trusts, estates): <code>37%</code> — the highest marginal individual rate</li>
+        <li><strong>Corporate partners</strong>: <code>21%</code> — the flat corporate rate</li>
+        <li>If a partner's allocable ECTI is a <strong>loss</strong>, no withholding is required (but track for carryforward)</li>
+        <li>Treaty-based rate reductions may apply on a partner-specific basis</li>
+      </ul>
+    </div>
+    <div class="ref-section">
+      <h3>Form 8804-C (Certificate)</h3>
+      <ul>
+        <li>A foreign partner may submit Form 8804-C to the partnership to certify deductions, losses, or other amounts that reduce the partner's ECTI</li>
+        <li>If accepted, the partnership can reduce withholding accordingly</li>
+        <li>The partnership is not required to accept an 8804-C</li>
+      </ul>
+    </div>
+    <div class="ref-section">
+      <h3>Section 1446(f) — Transfer Withholding</h3>
+      <ul>
+        <li>Separate from regular §1446 withholding</li>
+        <li>Applies when a foreign partner <strong>transfers</strong> (sells/exchanges) a partnership interest</li>
+        <li>The transferee must withhold <code>10%</code> of the amount realized</li>
+        <li>If the transferee fails to withhold, the partnership must withhold from future distributions</li>
+        <li>This withholding is also a credit on the transferor's US tax return</li>
+      </ul>
+    </div>
+    <div class="ref-section">
+      <h3>Installment Payments (Form 8813)</h3>
+      <ul>
+        <li>Partnerships pay estimated withholding in <strong>4 quarterly installments</strong></li>
+        <li>Due dates: <code>April 15</code>, <code>June 15</code>, <code>September 15</code>, <code>January 15</code> (following year)</li>
+        <li>Each installment = 25% of estimated annual withholding</li>
+        <li>Underpayment penalties apply (similar to individual estimated tax penalties under §6654)</li>
+        <li>Interest accrues on underpaid installments from the due date until paid</li>
+      </ul>
+    </div>
+    <div class="ref-section">
+      <h3>Treaty Considerations</h3>
+      <ul>
+        <li>Some US tax treaties reduce the §1446 withholding rate for certain income types</li>
+        <li>Treaty benefits are <strong>partner-specific</strong> — each partner's treaty country and income type must be analyzed</li>
+        <li>The partner must provide a valid Form W-8BEN or W-8BEN-E with treaty claims</li>
+        <li>Common treaty countries with relevant provisions: Israel, UK, Canada, Germany, Netherlands</li>
+      </ul>
+    </div>
+    <div class="ref-section">
+      <h3>Key Forms</h3>
+      <ul>
+        <li><strong>Form 8804</strong> — Annual Return for Partnership Withholding Tax (§1446). Filed by the partnership.</li>
+        <li><strong>Form 8805</strong> — Foreign Partner's Information Statement of §1446 Withholding Tax. Given to each foreign partner.</li>
+        <li><strong>Form 8813</strong> — Partnership Withholding Tax Payment Voucher (§1446). Used for quarterly installments.</li>
+        <li><strong>Form 8804-C</strong> — Certificate of Partner-Level Items to Reduce §1446 Withholding.</li>
+        <li><strong>Form 8288</strong> — US Withholding Tax Return for Certain Dispositions by Foreign Persons (for §1446(f)).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>Disclaimer:</strong> This calculator is an internal estimation tool provided by Philip Stein &amp; Associates for informational purposes only. It does not constitute tax advice. Actual withholding obligations may differ based on treaty provisions, Form 8804-C certifications, and other factors. Consult with a qualified tax professional for specific situations. Calculations are based on current rates (37% non-corporate / 21% corporate) and may change with legislation.
+  </div>
+</div>
+
+<footer>
+  &copy; <span id="footerYear"></span> Philip Stein &amp; Associates. Partnership Withholding Calculator v1.0
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+/* ── State ── */
+let partners = [];
+let nextId = 1;
+const CORPORATE_RATE = 0.21;
+const NONCORP_RATE = 0.37;
+const PENALTY_RATE = 0.08; // IRS underpayment rate approximation
+
+/* ── Tabs ── */
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-' + t.dataset.tab).classList.add('active');
+  });
+});
+
+/* ── Helpers ── */
+function fmt(n) {
+  if (n == null || isNaN(n)) return '$0';
+  const neg = n < 0;
+  const abs = Math.abs(n);
+  const s = abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return neg ? '($' + s + ')' : '$' + s;
+}
+
+function fmtPct(n) {
+  return (n * 100).toFixed(0) + '%';
+}
+
+function parseNum(v) {
+  if (!v) return 0;
+  return parseFloat(String(v).replace(/[^0-9.\-]/g, '')) || 0;
+}
+
+function getRate(type) {
+  return type === 'Corporation' ? CORPORATE_RATE : NONCORP_RATE;
+}
+
+function getTagClass(type) {
+  return type === 'Corporation' ? 'tag-corp' : 'tag-indiv';
+}
+
+function getTotalECTI() {
+  return parseNum(document.getElementById('totalECTI').value);
+}
+
+function getTaxYear() {
+  return parseInt(document.getElementById('taxYear').value) || 2025;
+}
+
+/* ── Format currency input ── */
+document.getElementById('totalECTI').addEventListener('blur', function() {
+  const v = parseNum(this.value);
+  if (v) this.value = v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+});
+document.getElementById('totalECTI').addEventListener('input', recalcAll);
+document.getElementById('taxYear').addEventListener('input', recalcAll);
+
+/* ── Partner CRUD ── */
+function addPartner() {
+  const id = nextId++;
+  partners.push({
+    id,
+    name: '',
+    type: 'Individual',
+    country: '',
+    inputMode: 'dollar', // 'dollar' or 'percent'
+    ectiDollar: 0,
+    ectiPercent: 0,
+    transferWithholding: 0,
+    q1: 0, q2: 0, q3: 0, q4: 0,
+    treatyRate: null
+  });
+  renderPartners();
+  recalcAll();
+}
+
+function removePartner(id) {
+  partners = partners.filter(p => p.id !== id);
+  renderPartners();
+  recalcAll();
+}
+
+function getPartnerECTI(p) {
+  if (p.inputMode === 'percent') {
+    return getTotalECTI() * (p.ectiPercent / 100);
+  }
+  return p.ectiDollar;
+}
+
+function getPartnerWithholding(p) {
+  const ecti = getPartnerECTI(p);
+  if (ecti <= 0) return 0;
+  const rate = p.treatyRate != null ? p.treatyRate / 100 : getRate(p.type);
+  return ecti * rate;
+}
+
+function getPartnerInstallmentsPaid(p) {
+  return p.q1 + p.q2 + p.q3 + p.q4;
+}
+
+function renderPartners() {
+  const list = document.getElementById('partnerList');
+  const empty = document.getElementById('emptyPartners');
+
+  if (partners.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  list.innerHTML = partners.map((p, idx) => `
+    <div class="partner-card" data-id="${p.id}">
+      <div class="card-header">
+        <h3>Partner ${idx + 1}${p.name ? ': ' + escHtml(p.name) : ''}</h3>
+        <button class="remove-btn no-print" onclick="removePartner(${p.id})" title="Remove partner">&times;</button>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Partner Name</label>
+          <input type="text" value="${escHtml(p.name)}" data-id="${p.id}" data-field="name" onchange="updatePartner(this)">
+        </div>
+        <div class="field">
+          <label>Partner Type</label>
+          <select data-id="${p.id}" data-field="type" onchange="updatePartner(this)">
+            <option${p.type==='Individual'?' selected':''}>Individual</option>
+            <option${p.type==='Corporation'?' selected':''}>Corporation</option>
+            <option${p.type==='Trust'?' selected':''}>Trust</option>
+            <option${p.type==='Estate'?' selected':''}>Estate</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Country of Residence</label>
+          <input type="text" value="${escHtml(p.country)}" data-id="${p.id}" data-field="country" onchange="updatePartner(this)" placeholder="e.g. Israel">
+        </div>
+        <div class="field">
+          <label>Treaty Rate Override (%)</label>
+          <input type="number" value="${p.treatyRate != null ? p.treatyRate : ''}" data-id="${p.id}" data-field="treatyRate" oninput="updatePartner(this)" placeholder="Leave blank for standard" min="0" max="100" step="0.1">
+          <span class="hint">Standard: ${fmtPct(getRate(p.type))} for ${p.type === 'Corporation' ? 'corporate' : 'non-corporate'}</span>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <div class="input-mode-row">
+          <span>Allocable ECTI Input</span>
+          <div class="toggle-group no-print">
+            <button class="${p.inputMode==='dollar'?'active':''}" onclick="setInputMode(${p.id},'dollar')">$ Amount</button>
+            <button class="${p.inputMode==='percent'?'active':''}" onclick="setInputMode(${p.id},'percent')">% of Total</button>
+          </div>
+        </div>
+        <div class="form-grid">
+          ${p.inputMode === 'dollar' ? `
+          <div class="field">
+            <label>Allocable ECTI ($)</label>
+            <input type="text" value="${p.ectiDollar ? p.ectiDollar.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : ''}" data-id="${p.id}" data-field="ectiDollar" oninput="updatePartnerNum(this)" placeholder="0.00" inputmode="decimal">
+          </div>` : `
+          <div class="field">
+            <label>% of Total Partnership ECTI</label>
+            <input type="number" value="${p.ectiPercent || ''}" data-id="${p.id}" data-field="ectiPercent" oninput="updatePartnerNum(this)" placeholder="0" min="0" max="100" step="0.01">
+            <span class="hint">= ${fmt(getPartnerECTI(p))} of ${fmt(getTotalECTI())} total ECTI</span>
+          </div>`}
+          <div class="field">
+            <label>1446(f) Transfer Withholding ($)</label>
+            <input type="text" value="${p.transferWithholding ? p.transferWithholding.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : ''}" data-id="${p.id}" data-field="transferWithholding" oninput="updatePartnerNum(this)" placeholder="0.00" inputmode="decimal">
+            <span class="hint">10% withholding on transfer of partnership interest</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <label style="font-size:.75rem;font-weight:600;color:var(--gray-700);text-transform:uppercase;letter-spacing:.03em;display:block;margin-bottom:8px">Installment Payments Made (Form 8813)</label>
+        <div class="quarters-grid">
+          <div class="quarter-field">
+            <label>Q1 — Apr 15</label>
+            <input type="text" value="${p.q1||''}" data-id="${p.id}" data-field="q1" oninput="updatePartnerNum(this)" placeholder="0.00" inputmode="decimal">
+          </div>
+          <div class="quarter-field">
+            <label>Q2 — Jun 15</label>
+            <input type="text" value="${p.q2||''}" data-id="${p.id}" data-field="q2" oninput="updatePartnerNum(this)" placeholder="0.00" inputmode="decimal">
+          </div>
+          <div class="quarter-field">
+            <label>Q3 — Sep 15</label>
+            <input type="text" value="${p.q3||''}" data-id="${p.id}" data-field="q3" oninput="updatePartnerNum(this)" placeholder="0.00" inputmode="decimal">
+          </div>
+          <div class="quarter-field">
+            <label>Q4 — Jan 15</label>
+            <input type="text" value="${p.q4||''}" data-id="${p.id}" data-field="q4" oninput="updatePartnerNum(this)" placeholder="0.00" inputmode="decimal">
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--gray-200)">
+        <div class="summary-grid">
+          <div class="summary-card">
+            <div class="label">Allocable ECTI</div>
+            <div class="value" style="font-size:1.05rem">${fmt(getPartnerECTI(p))}</div>
+          </div>
+          <div class="summary-card">
+            <div class="label">Rate</div>
+            <div class="value" style="font-size:1.05rem">${p.treatyRate != null ? p.treatyRate + '% (treaty)' : fmtPct(getRate(p.type))}</div>
+          </div>
+          <div class="summary-card highlight">
+            <div class="label">§1446 Withholding</div>
+            <div class="value" style="font-size:1.05rem">${fmt(getPartnerWithholding(p))}</div>
+          </div>
+          <div class="summary-card">
+            <div class="label">Total Tax Credit</div>
+            <div class="value" style="font-size:1.05rem">${fmt(getPartnerWithholding(p) + p.transferWithholding)}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+window.removePartner = removePartner;
+window.addPartner = addPartner;
+
+window.updatePartner = function(el) {
+  const id = parseInt(el.dataset.id);
+  const field = el.dataset.field;
+  const p = partners.find(x => x.id === id);
+  if (!p) return;
+  if (field === 'treatyRate') {
+    const v = el.value.trim();
+    p.treatyRate = v === '' ? null : parseFloat(v);
+  } else {
+    p[field] = el.value;
+  }
+  renderPartners();
+  recalcAll();
+};
+
+window.updatePartnerNum = function(el) {
+  const id = parseInt(el.dataset.id);
+  const field = el.dataset.field;
+  const p = partners.find(x => x.id === id);
+  if (!p) return;
+  p[field] = parseNum(el.value);
+  recalcSummary();
+  updatePartnerCardSummary(p);
+  renderInstallments();
+  renderPartnerSummaryTable();
+};
+
+function updatePartnerCardSummary(p) {
+  const card = document.querySelector(`.partner-card[data-id="${p.id}"]`);
+  if (!card) return;
+  const vals = card.querySelectorAll('.summary-card .value');
+  if (vals.length >= 4) {
+    vals[0].textContent = fmt(getPartnerECTI(p));
+    vals[1].textContent = p.treatyRate != null ? p.treatyRate + '% (treaty)' : fmtPct(getRate(p.type));
+    vals[2].textContent = fmt(getPartnerWithholding(p));
+    vals[3].textContent = fmt(getPartnerWithholding(p) + p.transferWithholding);
+  }
+  // Update the hint for percent mode
+  const hint = card.querySelector('.hint');
+  if (hint && p.inputMode === 'percent') {
+    const first = card.querySelector('.form-grid + div .hint, div[style] .hint');
+  }
+}
+
+window.setInputMode = function(id, mode) {
+  const p = partners.find(x => x.id === id);
+  if (!p) return;
+  p.inputMode = mode;
+  renderPartners();
+  recalcAll();
+};
+
+/* ── Recalculation ── */
+function recalcAll() {
+  recalcSummary();
+  renderPartnerSummaryTable();
+  renderInstallments();
+}
+
+function recalcSummary() {
+  const count = partners.length;
+  let totalAllocECTI = 0;
+  let totalWithholding = 0;
+  let totalInstallments = 0;
+
+  partners.forEach(p => {
+    const ecti = getPartnerECTI(p);
+    totalAllocECTI += ecti;
+    totalWithholding += getPartnerWithholding(p);
+    totalInstallments += getPartnerInstallmentsPaid(p);
+  });
+
+  const balance = totalWithholding - totalInstallments;
+
+  // Penalty estimation: interest on underpayment per quarter
+  let penalty = 0;
+  if (partners.length > 0) {
+    const qRequired = totalWithholding / 4;
+    const quarters = ['q1','q2','q3','q4'];
+    const qMonths = [9, 7, 4, 0]; // months of interest from due date to year end (approx)
+    partners.forEach(p => {
+      const pWithholding = getPartnerWithholding(p);
+      const pqReq = pWithholding / 4;
+      quarters.forEach((q, i) => {
+        const paid = p[q];
+        const under = Math.max(0, pqReq - paid);
+        penalty += under * (PENALTY_RATE / 12) * qMonths[i];
+      });
+    });
+  }
+
+  document.getElementById('sumPartnerCount').textContent = count;
+  document.getElementById('sumAllocECTI').textContent = fmt(totalAllocECTI);
+  document.getElementById('sumWithholding').textContent = fmt(totalWithholding);
+  document.getElementById('sumInstallments').textContent = fmt(totalInstallments);
+  document.getElementById('sumBalance').textContent = fmt(balance);
+  document.getElementById('sumPenalty').textContent = fmt(penalty);
+
+  const bc = document.getElementById('balanceCard');
+  bc.className = 'summary-card ' + (balance > 0 ? 'danger' : balance < 0 ? 'success' : '');
+
+  const pc = document.getElementById('penaltyCard');
+  pc.className = 'summary-card ' + (penalty > 0 ? 'warning' : '');
+}
+
+function renderPartnerSummaryTable() {
+  const el = document.getElementById('partnerSummaryTable');
+  if (partners.length === 0) {
+    el.innerHTML = '<div class="empty-state"><p>No partners added yet.</p></div>';
+    return;
+  }
+  let rows = partners.map((p, i) => {
+    const ecti = getPartnerECTI(p);
+    const wh = getPartnerWithholding(p);
+    const paid = getPartnerInstallmentsPaid(p);
+    const bal = wh - paid;
+    const isLoss = ecti < 0;
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${escHtml(p.name) || '<em>Unnamed</em>'}</td>
+      <td><span class="tag ${getTagClass(p.type)}">${p.type}</span></td>
+      <td>${escHtml(p.country) || '—'}</td>
+      <td class="text-right">${isLoss ? '<span class="tag tag-loss">Loss</span> ' : ''}${fmt(ecti)}</td>
+      <td class="text-center">${p.treatyRate != null ? p.treatyRate + '%' : fmtPct(getRate(p.type))}</td>
+      <td class="text-right">${fmt(wh)}</td>
+      <td class="text-right">${fmt(paid)}</td>
+      <td class="text-right" style="font-weight:600;color:${bal>0?'var(--red)':bal<0?'var(--green)':'inherit'}">${fmt(bal)}</td>
+    </tr>`;
+  }).join('');
+
+  const totalEcti = partners.reduce((s,p) => s + getPartnerECTI(p), 0);
+  const totalWh = partners.reduce((s,p) => s + getPartnerWithholding(p), 0);
+  const totalPaid = partners.reduce((s,p) => s + getPartnerInstallmentsPaid(p), 0);
+  const totalBal = totalWh - totalPaid;
+
+  el.innerHTML = `<table>
+    <thead><tr>
+      <th>#</th><th>Name</th><th>Type</th><th>Country</th>
+      <th class="text-right">Alloc. ECTI</th><th class="text-center">Rate</th>
+      <th class="text-right">Withholding</th><th class="text-right">Paid</th>
+      <th class="text-right">Balance</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+    <tfoot><tr style="font-weight:700;background:var(--gray-50)">
+      <td colspan="4">Total</td>
+      <td class="text-right">${fmt(totalEcti)}</td>
+      <td></td>
+      <td class="text-right">${fmt(totalWh)}</td>
+      <td class="text-right">${fmt(totalPaid)}</td>
+      <td class="text-right" style="color:${totalBal>0?'var(--red)':totalBal<0?'var(--green)':'inherit'}">${fmt(totalBal)}</td>
+    </tr></tfoot>
+  </table>`;
+}
+
+function renderInstallments() {
+  const el = document.getElementById('installmentContent');
+  if (partners.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">&#128197;</div><p>Add partners on the Partner Detail tab to see the installment schedule.</p></div>';
+    return;
+  }
+
+  const year = getTaxYear();
+  const dueDates = [
+    `Apr 15, ${year}`,
+    `Jun 15, ${year}`,
+    `Sep 15, ${year}`,
+    `Jan 15, ${year + 1}`
+  ];
+  const qKeys = ['q1','q2','q3','q4'];
+
+  let html = '';
+
+  // Per-partner installment tables
+  partners.forEach((p, idx) => {
+    const ecti = getPartnerECTI(p);
+    const wh = getPartnerWithholding(p);
+    const qReq = wh / 4;
+    let cumReq = 0, cumPaid = 0;
+
+    html += `<div style="margin-bottom:20px">
+      <h3 style="font-size:.88rem;font-weight:600;color:var(--gray-800);margin-bottom:8px">
+        Partner ${idx+1}: ${escHtml(p.name) || 'Unnamed'}
+        <span class="tag ${getTagClass(p.type)}" style="margin-left:6px">${p.type}</span>
+        — Annual Withholding: ${fmt(wh)}
+      </h3>
+      <table class="installment-table">
+        <thead><tr>
+          <th style="text-align:left">Quarter</th><th>Due Date</th><th>Required</th><th>Paid</th><th>Cumulative Req.</th><th>Cumulative Paid</th><th>Under/(Over)</th>
+        </tr></thead><tbody>`;
+
+    qKeys.forEach((q, i) => {
+      cumReq += qReq;
+      cumPaid += p[q];
+      const diff = cumReq - cumPaid;
+      html += `<tr>
+        <td style="text-align:left">Q${i+1}</td>
+        <td>${dueDates[i]}</td>
+        <td>${fmt(qReq)}</td>
+        <td>${fmt(p[q])}</td>
+        <td>${fmt(cumReq)}</td>
+        <td>${fmt(cumPaid)}</td>
+        <td style="font-weight:600;color:${diff>0?'var(--red)':diff<0?'var(--green)':'inherit'}">${fmt(diff)}</td>
+      </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+  });
+
+  // Aggregate schedule
+  if (partners.length > 1) {
+    const totalWh = partners.reduce((s,p) => s + getPartnerWithholding(p), 0);
+    const aggQReq = totalWh / 4;
+
+    html += `<div style="margin-top:10px;padding-top:16px;border-top:2px solid var(--blue-pale)">
+      <h3 style="font-size:.88rem;font-weight:600;color:var(--blue);margin-bottom:8px">
+        Aggregate Partnership Schedule — Annual Withholding: ${fmt(totalWh)}
+      </h3>
+      <table class="installment-table">
+        <thead><tr>
+          <th style="text-align:left">Quarter</th><th>Due Date</th><th>Required</th><th>Paid</th><th>Cumulative Req.</th><th>Cumulative Paid</th><th>Under/(Over)</th>
+        </tr></thead><tbody>`;
+
+    let cumReq = 0, cumPaid = 0;
+    qKeys.forEach((q, i) => {
+      cumReq += aggQReq;
+      const qPaid = partners.reduce((s,p) => s + p[q], 0);
+      cumPaid += qPaid;
+      const diff = cumReq - cumPaid;
+      html += `<tr>
+        <td style="text-align:left">Q${i+1}</td>
+        <td>${dueDates[i]}</td>
+        <td>${fmt(aggQReq)}</td>
+        <td>${fmt(qPaid)}</td>
+        <td>${fmt(cumReq)}</td>
+        <td>${fmt(cumPaid)}</td>
+        <td style="font-weight:600;color:${diff>0?'var(--red)':diff<0?'var(--green)':'inherit'}">${fmt(diff)}</td>
+      </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+/* ── Init ── */
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+recalcAll();
+
+})();
+</script>
+</body>
+</html>

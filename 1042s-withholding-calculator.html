@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1042-S Withholding Calculator — Philip Stein & Associates</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blue: #1a5276;
+  --blue-light: #2980b9;
+  --blue-pale: #eaf2f8;
+  --gray-bg: #f5f6fa;
+  --gray-border: #dce1e8;
+  --gray-text: #5a6a7a;
+  --red: #c0392b;
+  --green: #27ae60;
+  --orange: #e67e22;
+  --white: #ffffff;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--gray-bg); color: #2c3e50; line-height: 1.5; }
+header { background: var(--blue); color: var(--white); padding: 1.25rem 2rem; }
+header h1 { font-size: 1.4rem; font-weight: 600; }
+header p { font-size: 0.85rem; opacity: 0.8; margin-top: 0.15rem; }
+.container { max-width: 960px; margin: 0 auto; padding: 1.5rem 1rem; }
+.tabs { display: flex; gap: 0; border-bottom: 2px solid var(--blue); margin-bottom: 1.5rem; }
+.tab { padding: 0.65rem 1.25rem; cursor: pointer; font-size: 0.9rem; font-weight: 500; color: var(--gray-text); background: var(--white); border: 1px solid var(--gray-border); border-bottom: none; border-radius: 6px 6px 0 0; margin-bottom: -2px; transition: background 0.15s, color 0.15s; }
+.tab:hover { background: var(--blue-pale); }
+.tab.active { background: var(--blue); color: var(--white); border-color: var(--blue); }
+.panel { display: none; }
+.panel.active { display: block; }
+.card { background: var(--white); border: 1px solid var(--gray-border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: var(--shadow); }
+.card h2 { font-size: 1.1rem; color: var(--blue); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--gray-border); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.form-group { display: flex; flex-direction: column; }
+.form-group.full { grid-column: 1 / -1; }
+label { font-size: 0.8rem; font-weight: 600; color: var(--gray-text); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.3rem; }
+select, input[type="number"], input[type="text"] {
+  padding: 0.55rem 0.75rem; border: 1px solid var(--gray-border); border-radius: 5px;
+  font-size: 0.95rem; color: #2c3e50; background: var(--white); transition: border-color 0.15s;
+}
+select:focus, input:focus { outline: none; border-color: var(--blue-light); box-shadow: 0 0 0 2px rgba(41,128,185,0.15); }
+select { cursor: pointer; }
+.hint { font-size: 0.75rem; color: var(--gray-text); margin-top: 0.2rem; font-style: italic; }
+.results { background: var(--blue-pale); border: 1px solid #b8d4e8; border-radius: 8px; padding: 1.25rem; margin-top: 1rem; }
+.results h3 { font-size: 1rem; color: var(--blue); margin-bottom: 0.75rem; }
+.result-row { display: flex; justify-content: space-between; padding: 0.4rem 0; font-size: 0.95rem; }
+.result-row + .result-row { border-top: 1px solid rgba(26,82,118,0.1); }
+.result-row .label { color: var(--gray-text); }
+.result-row .value { font-weight: 600; }
+.result-row.total { font-size: 1.05rem; border-top: 2px solid var(--blue); padding-top: 0.6rem; margin-top: 0.3rem; }
+.result-row.total .value { color: var(--blue); }
+.reconciliation { margin-top: 0.75rem; padding: 0.75rem; border-radius: 6px; font-weight: 600; font-size: 0.95rem; }
+.reconciliation.over { background: #fdebd0; color: var(--orange); }
+.reconciliation.under { background: #fadbd8; color: var(--red); }
+.reconciliation.match { background: #d5f5e3; color: var(--green); }
+.treaty-note { background: #fef9e7; border: 1px solid #f9e79f; border-radius: 6px; padding: 0.75rem 1rem; margin-top: 0.75rem; font-size: 0.85rem; color: #7d6608; }
+.treaty-note strong { color: #b7950b; }
+.toggle-wrap { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+.toggle { position: relative; width: 42px; height: 22px; cursor: pointer; }
+.toggle input { display: none; }
+.toggle .slider { position: absolute; inset: 0; background: var(--gray-border); border-radius: 22px; transition: background 0.2s; }
+.toggle .slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: var(--white); border-radius: 50%; transition: transform 0.2s; }
+.toggle input:checked + .slider { background: var(--blue); }
+.toggle input:checked + .slider::before { transform: translateX(20px); }
+.toggle-label { font-size: 0.9rem; font-weight: 500; cursor: pointer; }
+.btn { background: var(--blue); color: var(--white); border: none; padding: 0.6rem 1.5rem; border-radius: 5px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+.btn:hover { background: var(--blue-light); }
+table.treaty-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+table.treaty-table th { background: var(--blue); color: var(--white); padding: 0.6rem 0.5rem; text-align: left; font-weight: 500; position: sticky; top: 0; }
+table.treaty-table td { padding: 0.5rem; border-bottom: 1px solid var(--gray-border); }
+table.treaty-table tr:hover td { background: var(--blue-pale); }
+table.treaty-table .country-col { font-weight: 600; color: var(--blue); white-space: nowrap; }
+.table-scroll { overflow-x: auto; }
+.summary-box { background: var(--white); border: 2px solid var(--blue); border-radius: 8px; padding: 1.25rem; margin-top: 1rem; }
+.summary-box h3 { font-size: 1rem; color: var(--blue); margin-bottom: 0.5rem; }
+.summary-row { display: grid; grid-template-columns: 180px 1fr; gap: 0.5rem; padding: 0.3rem 0; font-size: 0.9rem; }
+.summary-row .sl { color: var(--gray-text); font-weight: 500; }
+footer { text-align: center; padding: 1.5rem 1rem; font-size: 0.75rem; color: var(--gray-text); border-top: 1px solid var(--gray-border); margin-top: 2rem; background: var(--white); }
+footer p + p { margin-top: 0.3rem; }
+@media (max-width: 640px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .tabs { flex-wrap: wrap; }
+  .tab { flex: 1; text-align: center; font-size: 0.8rem; padding: 0.5rem 0.5rem; }
+  .summary-row { grid-template-columns: 1fr; }
+  header { padding: 1rem; }
+  header h1 { font-size: 1.15rem; }
+}
+@media print {
+  body { background: white; }
+  header { background: white !important; color: var(--blue) !important; border-bottom: 2px solid var(--blue); }
+  header p { color: var(--gray-text) !important; opacity: 1 !important; }
+  .tabs, .btn, .toggle-wrap, footer { display: none !important; }
+  .panel { display: block !important; }
+  .card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>1042-S Withholding Calculator</h1>
+  <p>Philip Stein &amp; Associates &mdash; Internal Tool</p>
+</header>
+
+<div style="max-width:960px;margin:0 auto;padding:12px 16px 0;"><a href="index.html" style="display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;color:#1a5276;text-decoration:none;font-weight:500;padding:6px 12px;border:1px solid #aed6f1;border-radius:6px;background:#eaf2f8;transition:background .15s;" onmouseover="this.style.background='#d4e6f1'" onmouseout="this.style.background='#eaf2f8'">← All Tools</a></div>
+<div class="container">
+  <div class="tabs">
+    <div class="tab active" data-tab="calc">Withholding Calculator</div>
+    <div class="tab" data-tab="grossup">Gross-Up Calculator</div>
+    <div class="tab" data-tab="treaty">Treaty Rate Reference</div>
+  </div>
+
+  <!-- WITHHOLDING CALCULATOR -->
+  <div class="panel active" id="panel-calc">
+    <div class="card">
+      <h2>Income &amp; Recipient Details</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="incomeType">Income Type (1042-S Code)</label>
+          <select id="incomeType"></select>
+        </div>
+        <div class="form-group">
+          <label for="grossIncome">Gross Income Amount ($)</label>
+          <input type="number" id="grossIncome" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label for="country">Country of Residence</label>
+          <select id="country"></select>
+        </div>
+        <div class="form-group">
+          <label for="exemptionCode">Exemption Code</label>
+          <select id="exemptionCode"></select>
+        </div>
+        <div class="form-group">
+          <label for="treatyRate">Treaty Rate Override (%)</label>
+          <input type="number" id="treatyRate" min="0" max="100" step="0.1" placeholder="e.g. 25">
+          <span class="hint" id="treatyHint">Auto-populated when treaty country &amp; income type are selected</span>
+        </div>
+        <div class="form-group">
+          <label for="withheld">Withholding Already Applied ($)</label>
+          <input type="number" id="withheld" min="0" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+    </div>
+
+    <button class="btn" onclick="calculate()">Calculate Withholding</button>
+
+    <div id="calcResults" style="display:none;">
+      <div class="results">
+        <h3>Withholding Calculation</h3>
+        <div class="result-row"><span class="label">Gross Income</span><span class="value" id="rGross"></span></div>
+        <div class="result-row"><span class="label">Statutory Rate (Chapter 3)</span><span class="value">30%</span></div>
+        <div class="result-row"><span class="label">Applicable Rate</span><span class="value" id="rRate"></span></div>
+        <div class="result-row"><span class="label">Rate Basis</span><span class="value" id="rBasis"></span></div>
+        <div class="result-row total"><span class="label">Calculated Withholding</span><span class="value" id="rWithholding"></span></div>
+        <div class="result-row"><span class="label">Net to Recipient</span><span class="value" id="rNet"></span></div>
+        <div id="reconciliationBox" class="reconciliation" style="display:none;"></div>
+      </div>
+      <div id="treatyNoteBox" class="treaty-note" style="display:none;"></div>
+      <div class="summary-box" id="summaryBox">
+        <h3>1042-S Reporting Summary</h3>
+        <div class="summary-row"><span class="sl">Income Code:</span><span id="sCode"></span></div>
+        <div class="summary-row"><span class="sl">Gross Income (Box 2):</span><span id="sGross"></span></div>
+        <div class="summary-row"><span class="sl">Tax Rate (Box 5):</span><span id="sRate"></span></div>
+        <div class="summary-row"><span class="sl">Exemption Code (Box 6):</span><span id="sExempt"></span></div>
+        <div class="summary-row"><span class="sl">Tax Withheld (Box 7):</span><span id="sWithheld"></span></div>
+        <div class="summary-row"><span class="sl">Country Code:</span><span id="sCountry"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GROSS-UP CALCULATOR -->
+  <div class="panel" id="panel-grossup">
+    <div class="card">
+      <h2>Gross-Up Calculator</h2>
+      <p style="font-size:0.9rem;color:var(--gray-text);margin-bottom:1rem;">When a nonresident alien is promised a specific <strong>net</strong> payment, use this to determine the required gross amount and withholding.</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="guNet">Net Payment Promised ($)</label>
+          <input type="number" id="guNet" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label for="guRate">Applicable Withholding Rate (%)</label>
+          <input type="number" id="guRate" min="0" max="100" step="0.1" value="30" placeholder="30">
+        </div>
+      </div>
+    </div>
+    <button class="btn" onclick="calcGrossUp()">Calculate Gross-Up</button>
+    <div id="guResults" style="display:none;">
+      <div class="results">
+        <h3>Gross-Up Results</h3>
+        <div class="result-row"><span class="label">Net Payment</span><span class="value" id="guRNet"></span></div>
+        <div class="result-row"><span class="label">Withholding Rate</span><span class="value" id="guRRate"></span></div>
+        <div class="result-row"><span class="label">Formula</span><span class="value">Gross = Net &divide; (1 &minus; Rate)</span></div>
+        <div class="result-row total"><span class="label">Required Gross Amount</span><span class="value" id="guRGross"></span></div>
+        <div class="result-row"><span class="label">Withholding Amount</span><span class="value" id="guRTax"></span></div>
+        <div class="result-row"><span class="label">Verification (Gross &minus; Tax)</span><span class="value" id="guRVerify"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TREATY RATE REFERENCE -->
+  <div class="panel" id="panel-treaty">
+    <div class="card">
+      <h2>Treaty Rate Reference — Common Income Types</h2>
+      <p style="font-size:0.85rem;color:var(--gray-text);margin-bottom:1rem;">Rates shown are maximum treaty rates (%). Actual rates may vary based on specific conditions, ownership thresholds, and recipient qualifications. Always verify against the applicable treaty text.</p>
+      <div class="table-scroll">
+        <table class="treaty-table" id="treatyTable"></table>
+      </div>
+    </div>
+    <div class="card">
+      <h2>US-Israel Treaty — Key Provisions</h2>
+      <div style="font-size:0.9rem;line-height:1.7;">
+        <p><strong>Article 11 — Dividends:</strong> 25% general rate; 12.5% if beneficial owner is a company holding &ge;10% of voting stock.</p>
+        <p><strong>Article 12 — Interest:</strong> 17.5% general rate; 0% for interest paid to the government or central bank.</p>
+        <p><strong>Article 13 — Royalties:</strong> 15% general rate; 10% for industrial royalties (patents, know-how, etc.).</p>
+        <p><strong>Article 17 — Pensions:</strong> Generally taxable only in the country of residence, subject to conditions.</p>
+        <p><strong>Article 24 — Teachers &amp; Researchers:</strong> Exempt from host-country tax for up to 2 years.</p>
+        <p><strong>Article 24 — Students &amp; Trainees:</strong> Up to $3,000/year exempt for living expenses.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p><strong>Disclaimer:</strong> This calculator is an internal reference tool for Philip Stein &amp; Associates. It does not constitute tax advice. Treaty rate applicability depends on specific facts and circumstances, including LOB provisions and beneficial ownership requirements. Always consult the relevant treaty text and IRS guidance for authoritative rates.</p>
+  <p>&copy; 2026 Philip Stein &amp; Associates. All rights reserved.</p>
+</footer>
+
+<script>
+(function() {
+  // ── Data ────────────────────────────────────────────────────────
+  const INCOME_CODES = [
+    ['01','Interest paid by US obligors'],
+    ['02','Interest on real property mortgages'],
+    ['04','Interest paid to controlling foreign corporations'],
+    ['06','Dividends paid by US corporations — qualified'],
+    ['07','Dividends paid by US corporations — non-qualified'],
+    ['10','Industrial royalties'],
+    ['11','Motion picture or TV copyright royalties'],
+    ['12','Other royalties'],
+    ['14','Real property income and natural resources royalties'],
+    ['15','Pensions, annuities, alimony, and/or insurance premiums'],
+    ['16','Scholarship or fellowship grants'],
+    ['17','Compensation for independent personal services'],
+    ['18','Compensation for dependent personal services'],
+    ['19','Compensation for teaching'],
+    ['20','Compensation during studying and training'],
+    ['24','Real estate investment trust (REIT) distributions'],
+    ['27','Publicly traded partnership distributions'],
+    ['29','Deposit interest'],
+    ['34','Substitute payments — dividends'],
+    ['36','Capital gains distributions from mutual funds'],
+    ['37','Return of capital'],
+    ['50','Other income'],
+    ['51','Gains from disposal of timber/coal/iron ore'],
+    ['52','Grants or other amounts paid by IRS'],
+    ['54','Eligible deferred compensation from 457(b) plans']
+  ];
+
+  const COUNTRIES = [
+    ['IL','Israel'],['CA','Canada'],['GB','United Kingdom'],['DE','Germany'],
+    ['FR','France'],['IN','India'],['CN','China'],['JP','Japan'],
+    ['AU','Australia'],['MX','Mexico'],['BR','Brazil'],['OT','Other']
+  ];
+
+  const EXEMPTION_CODES = [
+    ['00','No exemption'],
+    ['01','Exempt — income effectively connected with US trade or business'],
+    ['02','Exempt — treaty exemption'],
+    ['03','Exempt — income not from US sources'],
+    ['04','Exempt — international organization'],
+    ['05','Exempt — portfolio interest'],
+    ['06','Exempt — foreign tax-exempt organization'],
+    ['07','Exempt — section 501(c)(3) organization'],
+    ['08','Exempt — other']
+  ];
+
+  // Treaty rates: country -> income category -> { rate, note }
+  // Categories mapped from income codes
+  const CATEGORY_MAP = {
+    '01':'interest','02':'interest','04':'interest','29':'interest',
+    '06':'div_qual','07':'div_nonqual','34':'div_nonqual',
+    '10':'royalties_ind','11':'royalties','12':'royalties',
+    '14':'real_property',
+    '15':'pensions',
+    '16':'scholarship',
+    '17':'indep_services','18':'dep_services',
+    '19':'teaching','20':'studying',
+    '24':'reit','27':'ptp','36':'cap_gains','37':'return_capital',
+    '50':'other','51':'other','52':'other','54':'pensions'
+  };
+
+  const TREATY = {
+    IL: {
+      interest:       { rate: 17.5, note: 'Art. 12; 0% for government interest' },
+      div_qual:       { rate: 25,   note: 'Art. 11; 12.5% if ≥10% voting stock' },
+      div_nonqual:    { rate: 25,   note: 'Art. 11; 12.5% if ≥10% voting stock' },
+      royalties_ind:  { rate: 10,   note: 'Art. 13; industrial royalties' },
+      royalties:      { rate: 15,   note: 'Art. 13' },
+      pensions:       { rate: 0,    note: 'Art. 17; generally taxable only in residence country' },
+      teaching:       { rate: 0,    note: 'Art. 24; exempt for first 2 years' },
+      studying:       { rate: 0,    note: 'Art. 24; $3,000/yr exempt' },
+      indep_services: { rate: 30,   note: 'No reduction; statutory rate applies' },
+      dep_services:   { rate: 30,   note: 'No reduction; statutory rate applies' },
+      scholarship:    { rate: 30,   note: 'No specific treaty provision' },
+      real_property:  { rate: 30,   note: 'Generally subject to FIRPTA / statutory rate' },
+      reit:           { rate: 25,   note: 'Treated as dividends under Art. 11' },
+      ptp:            { rate: 25,   note: 'Treated as dividends under Art. 11' },
+      cap_gains:      { rate: 30,   note: 'No reduction; statutory rate applies' }
+    },
+    CA: {
+      interest:       { rate: 0,    note: 'Art. XI; 0% per 5th Protocol' },
+      div_qual:       { rate: 15,   note: 'Art. X; 5% if ≥10% ownership' },
+      div_nonqual:    { rate: 15,   note: 'Art. X; 5% if ≥10% ownership' },
+      royalties_ind:  { rate: 0,    note: 'Art. XII; 0% for most royalties' },
+      royalties:      { rate: 10,   note: 'Art. XII; 10% for copyright royalties' },
+      pensions:       { rate: 15,   note: 'Art. XVIII; 15% max' },
+      teaching:       { rate: 0,    note: 'Exempt under certain conditions' },
+      studying:       { rate: 0,    note: 'Art. XX; exempt' },
+      indep_services: { rate: 30,   note: 'No reduction' },
+      dep_services:   { rate: 30,   note: 'No reduction unless < 183 days' },
+      real_property:  { rate: 30,   note: 'FIRPTA applies' },
+      reit:           { rate: 15,   note: 'Art. X' },
+      cap_gains:      { rate: 30,   note: 'No reduction' }
+    },
+    GB: {
+      interest:       { rate: 0,    note: 'Art. 11; 0%' },
+      div_qual:       { rate: 15,   note: 'Art. 10; 5% if ≥10% ownership' },
+      div_nonqual:    { rate: 15,   note: 'Art. 10; 5% if ≥10% ownership' },
+      royalties_ind:  { rate: 0,    note: 'Art. 12; 0%' },
+      royalties:      { rate: 0,    note: 'Art. 12; 0%' },
+      pensions:       { rate: 0,    note: 'Art. 17; taxable only in residence state' },
+      teaching:       { rate: 0,    note: 'Exempt for 2 years' },
+      studying:       { rate: 0,    note: 'Exempt' },
+      indep_services: { rate: 30,   note: 'No reduction' },
+      dep_services:   { rate: 30,   note: 'No reduction unless < 183 days' },
+      real_property:  { rate: 30,   note: 'FIRPTA applies' },
+      reit:           { rate: 15,   note: 'Art. 10' },
+      cap_gains:      { rate: 30,   note: 'No reduction' }
+    },
+    DE: {
+      interest:       { rate: 0,    note: 'Art. 11; 0%' },
+      div_qual:       { rate: 15,   note: 'Art. 10; 5% if ≥10% ownership' },
+      div_nonqual:    { rate: 15,   note: 'Art. 10' },
+      royalties_ind:  { rate: 0,    note: 'Art. 12; 0%' },
+      royalties:      { rate: 0,    note: 'Art. 12; 0%' },
+      pensions:       { rate: 0,    note: 'Art. 18; residence state only' },
+      teaching:       { rate: 0,    note: 'Exempt for 2 years' },
+      studying:       { rate: 0,    note: 'Exempt' },
+      indep_services: { rate: 30,   note: 'No reduction' },
+      dep_services:   { rate: 30,   note: 'No reduction' },
+      real_property:  { rate: 30,   note: 'FIRPTA applies' },
+      reit:           { rate: 15,   note: 'Art. 10' },
+      cap_gains:      { rate: 30,   note: 'No reduction' }
+    },
+    FR: {
+      interest:       { rate: 0,    note: 'Art. 11; 0%' },
+      div_qual:       { rate: 15,   note: 'Art. 10; 5% if ≥10% ownership' },
+      div_nonqual:    { rate: 15,   note: 'Art. 10' },
+      royalties_ind:  { rate: 0,    note: 'Art. 12; 0%' },
+      royalties:      { rate: 5,    note: 'Art. 12; 5% for film/TV royalties' },
+      pensions:       { rate: 0,    note: 'Art. 18; residence state only' },
+      teaching:       { rate: 0,    note: 'Exempt for 2 years' },
+      studying:       { rate: 0,    note: 'Exempt' },
+      indep_services: { rate: 30,   note: 'No reduction' },
+      dep_services:   { rate: 30,   note: 'No reduction' },
+      real_property:  { rate: 30,   note: 'FIRPTA applies' },
+      reit:           { rate: 15,   note: 'Art. 10' },
+      cap_gains:      { rate: 30,   note: 'No reduction' }
+    },
+    IN: {
+      interest:       { rate: 15,   note: 'Art. 11; 15%' },
+      div_qual:       { rate: 25,   note: 'Art. 10; 15% if ≥10% ownership' },
+      div_nonqual:    { rate: 25,   note: 'Art. 10' },
+      royalties_ind:  { rate: 15,   note: 'Art. 12; 10-15%' },
+      royalties:      { rate: 15,   note: 'Art. 12' },
+      pensions:       { rate: 30,   note: 'No reduction; source state may tax' },
+      teaching:       { rate: 0,    note: 'Exempt for 2 years' },
+      studying:       { rate: 0,    note: 'Exempt' },
+      indep_services: { rate: 30,   note: 'No reduction' },
+      dep_services:   { rate: 30,   note: 'No reduction' },
+      real_property:  { rate: 30,   note: 'FIRPTA applies' },
+      reit:           { rate: 25,   note: 'Art. 10' },
+      cap_gains:      { rate: 30,   note: 'No reduction' }
+    },
+    CN: {
+      interest:       { rate: 10,   note: 'Art. 10; 10%' },
+      div_qual:       { rate: 10,   note: 'Art. 9; 10%' },
+      div_nonqual:    { rate: 10,   note: 'Art. 9; 10%' },
+      royalties_ind:  { rate: 10,   note: 'Art. 11; 10%' },
+      royalties:      { rate: 10,   note: 'Art. 11; 10%' },
+      pensions:       { rate: 30,   note: 'No reduction' },
+      teaching:       { rate: 0,    note: 'Art. 19; exempt for 3 years' },
+      studying:       { rate: 0,    note: 'Art. 20; exempt' },
+      indep_services: { rate: 30,   note: 'No reduction' },
+      dep_services:   { rate: 30,   note: 'No reduction' },
+      real_property:  { rate: 30,   note: 'FIRPTA applies' },
+      reit:           { rate: 10,   note: 'Art. 9' },
+      cap_gains:      { rate: 30,   note: 'No reduction' }
+    },
+    JP: {
+      interest:       { rate: 0,    note: 'Art. 11; 0% (2019 protocol)' },
+      div_qual:       { rate: 10,   note: 'Art. 10; 5% if ≥10% ownership, 0% if ≥50%' },
+      div_nonqual:    { rate: 10,   note: 'Art. 10' },
+      royalties_ind:  { rate: 0,    note: 'Art. 12; 0%' },
+      royalties:      { rate: 0,    note: 'Art. 12; 0%' },
+      pensions:       { rate: 0,    note: 'Art. 17; residence state only' },
+      teaching:       { rate: 0,    note: 'Exempt for 2 years' },
+      studying:       { rate: 0,    note: 'Exempt' },
+      indep_services: { rate: 30,   note: 'No reduction' },
+      dep_services:   { rate: 30,   note: 'No reduction' },
+      real_property:  { rate: 30,   note: 'FIRPTA applies' },
+      reit:           { rate: 10,   note: 'Art. 10' },
+      cap_gains:      { rate: 30,   note: 'No reduction' }
+    }
+  };
+
+  // ── Populate Selects ───────────────────────────────────────────
+  const selIncome = document.getElementById('incomeType');
+  const selCountry = document.getElementById('country');
+  const selExempt = document.getElementById('exemptionCode');
+
+  INCOME_CODES.forEach(([code, desc]) => {
+    selIncome.appendChild(new Option(code + ' — ' + desc, code));
+  });
+  COUNTRIES.forEach(([code, name]) => {
+    selCountry.appendChild(new Option(name, code));
+  });
+  EXEMPTION_CODES.forEach(([code, desc]) => {
+    selExempt.appendChild(new Option(code + ' — ' + desc, code));
+  });
+
+  // ── Auto-populate treaty rate ──────────────────────────────────
+  function autoTreatyRate() {
+    var cc = selCountry.value;
+    var ic = selIncome.value;
+    var cat = CATEGORY_MAP[ic];
+    var hint = document.getElementById('treatyHint');
+    var input = document.getElementById('treatyRate');
+    if (TREATY[cc] && cat && TREATY[cc][cat]) {
+      var t = TREATY[cc][cat];
+      input.value = t.rate;
+      hint.textContent = t.note;
+      if (t.rate < 30) {
+        selExempt.value = '02';
+      }
+    } else if (cc === 'OT') {
+      input.value = '';
+      hint.textContent = 'No treaty data for "Other" — enter rate manually if applicable';
+    } else {
+      input.value = '';
+      hint.textContent = 'No treaty rate available for this combination';
+    }
+  }
+  selIncome.addEventListener('change', autoTreatyRate);
+  selCountry.addEventListener('change', autoTreatyRate);
+
+  // ── Tabs ───────────────────────────────────────────────────────
+  document.querySelectorAll('.tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ── Formatting ─────────────────────────────────────────────────
+  function fmt(n) { return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+  // ── Withholding Calculation ────────────────────────────────────
+  window.calculate = function() {
+    var gross = parseFloat(document.getElementById('grossIncome').value) || 0;
+    var treatyInput = document.getElementById('treatyRate').value;
+    var withheld = parseFloat(document.getElementById('withheld').value) || 0;
+    var exemptCode = selExempt.value;
+    var cc = selCountry.value;
+    var ic = selIncome.value;
+    var cat = CATEGORY_MAP[ic];
+
+    var rate = 30;
+    var basis = 'Statutory rate (30%)';
+
+    // Check exemptions first
+    if (exemptCode !== '00' && exemptCode !== '02') {
+      rate = 0;
+      basis = 'Exempt — Code ' + exemptCode;
+    } else if (treatyInput !== '' && !isNaN(parseFloat(treatyInput))) {
+      rate = parseFloat(treatyInput);
+      var countryName = COUNTRIES.find(function(c) { return c[0] === cc; });
+      basis = 'Treaty rate (' + (countryName ? countryName[1] : cc) + ')';
+    }
+
+    var taxAmt = gross * (rate / 100);
+    var net = gross - taxAmt;
+    var diff = withheld - taxAmt;
+
+    document.getElementById('rGross').textContent = fmt(gross);
+    document.getElementById('rRate').textContent = rate + '%';
+    document.getElementById('rBasis').textContent = basis;
+    document.getElementById('rWithholding').textContent = fmt(taxAmt);
+    document.getElementById('rNet').textContent = fmt(net);
+
+    // Reconciliation
+    var reconBox = document.getElementById('reconciliationBox');
+    if (withheld > 0 || document.getElementById('withheld').value !== '') {
+      reconBox.style.display = 'block';
+      if (Math.abs(diff) < 0.005) {
+        reconBox.className = 'reconciliation match';
+        reconBox.textContent = 'Withholding matches calculated amount.';
+      } else if (diff > 0) {
+        reconBox.className = 'reconciliation over';
+        reconBox.textContent = 'Over-withheld by ' + fmt(diff) + '. Recipient may claim refund on Form 1040-NR.';
+      } else {
+        reconBox.className = 'reconciliation under';
+        reconBox.textContent = 'Under-withheld by ' + fmt(Math.abs(diff)) + '. Withholding agent may be liable for deficiency.';
+      }
+    } else {
+      reconBox.style.display = 'none';
+    }
+
+    // Treaty note
+    var noteBox = document.getElementById('treatyNoteBox');
+    if (TREATY[cc] && cat && TREATY[cc][cat] && rate < 30) {
+      noteBox.style.display = 'block';
+      var t = TREATY[cc][cat];
+      noteBox.innerHTML = '<strong>Treaty Note:</strong> ' + t.note + '. Ensure Form W-8BEN is on file with valid treaty claim and TIN. Recipient must meet LOB requirements.';
+    } else {
+      noteBox.style.display = 'none';
+    }
+
+    // 1042-S summary
+    var incomeDesc = INCOME_CODES.find(function(i) { return i[0] === ic; });
+    document.getElementById('sCode').textContent = ic + ' — ' + (incomeDesc ? incomeDesc[1] : '');
+    document.getElementById('sGross').textContent = fmt(gross);
+    document.getElementById('sRate').textContent = rate.toFixed(2) + '%';
+    document.getElementById('sExempt').textContent = exemptCode;
+    document.getElementById('sWithheld').textContent = fmt(taxAmt);
+    var countryEntry = COUNTRIES.find(function(c) { return c[0] === cc; });
+    document.getElementById('sCountry').textContent = cc + (countryEntry ? ' (' + countryEntry[1] + ')' : '');
+
+    document.getElementById('calcResults').style.display = 'block';
+  };
+
+  // ── Gross-Up Calculation ───────────────────────────────────────
+  window.calcGrossUp = function() {
+    var net = parseFloat(document.getElementById('guNet').value) || 0;
+    var rate = parseFloat(document.getElementById('guRate').value) || 0;
+    if (rate >= 100) { alert('Rate must be less than 100%.'); return; }
+    var gross = net / (1 - rate / 100);
+    var tax = gross - net;
+    document.getElementById('guRNet').textContent = fmt(net);
+    document.getElementById('guRRate').textContent = rate + '%';
+    document.getElementById('guRGross').textContent = fmt(gross);
+    document.getElementById('guRTax').textContent = fmt(tax);
+    document.getElementById('guRVerify').textContent = fmt(gross - tax) + ' (= net payment)';
+    document.getElementById('guResults').style.display = 'block';
+  };
+
+  // ── Treaty Reference Table ─────────────────────────────────────
+  (function buildTreatyTable() {
+    var cats = [
+      ['interest','Interest'],
+      ['div_qual','Dividends (Qualified)'],
+      ['div_nonqual','Dividends (Non-Qual.)'],
+      ['royalties_ind','Industrial Royalties'],
+      ['royalties','Other Royalties'],
+      ['pensions','Pensions'],
+      ['teaching','Teaching'],
+      ['studying','Students/Trainees']
+    ];
+    var countries = [
+      ['IL','Israel'],['CA','Canada'],['GB','UK'],['DE','Germany'],
+      ['FR','France'],['IN','India'],['CN','China'],['JP','Japan']
+    ];
+
+    var html = '<thead><tr><th>Country</th>';
+    cats.forEach(function(c) { html += '<th>' + c[1] + '</th>'; });
+    html += '</tr></thead><tbody>';
+
+    countries.forEach(function(co) {
+      html += '<tr><td class="country-col">' + co[1] + '</td>';
+      cats.forEach(function(ca) {
+        var d = TREATY[co[0]] && TREATY[co[0]][ca[0]];
+        if (d) {
+          var display = d.rate === 30 ? '30%*' : d.rate + '%';
+          html += '<td title="' + d.note.replace(/"/g, '&quot;') + '">' + display + '</td>';
+        } else {
+          html += '<td>30%*</td>';
+        }
+      });
+      html += '</tr>';
+    });
+    html += '</tbody>';
+    document.getElementById('treatyTable').innerHTML = html;
+    var foot = document.createElement('p');
+    foot.style.cssText = 'font-size:0.8rem;color:var(--gray-text);margin-top:0.75rem;';
+    foot.innerHTML = '* 30% = statutory rate (no treaty reduction). Hover over cells for treaty article references. Rates are subject to LOB and other conditions.';
+    document.getElementById('treatyTable').parentNode.appendChild(foot);
+  })();
+
+})();
+</script>
+</body>
+</html>

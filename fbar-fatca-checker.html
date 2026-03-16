@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FBAR & FATCA Reporting Checker — Philip Stein & Associates</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue: #1a5276;
+  --blue-light: #2980b9;
+  --blue-pale: #eaf2f8;
+  --green: #27ae60;
+  --green-bg: #eafaf1;
+  --red: #c0392b;
+  --red-bg: #fdedec;
+  --yellow: #f39c12;
+  --yellow-bg: #fef9e7;
+  --gray-50: #f8f9fa;
+  --gray-100: #f0f1f3;
+  --gray-200: #dfe2e6;
+  --gray-400: #a0a7b0;
+  --gray-600: #636b75;
+  --gray-800: #2d3339;
+  --radius: 8px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-lg: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+  background: var(--gray-50);
+  color: var(--gray-800);
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.container { max-width: 900px; margin: 0 auto; padding: 0 20px 60px; }
+
+header {
+  background: var(--blue);
+  color: #fff;
+  padding: 28px 20px 24px;
+  text-align: center;
+}
+header h1 { font-size: 1.65rem; font-weight: 700; letter-spacing: -0.3px; }
+header .subtitle { font-size: 0.95rem; opacity: 0.85; margin-top: 4px; font-weight: 400; }
+
+.disclaimer-bar {
+  background: var(--yellow-bg);
+  border-bottom: 1px solid #f0e0a0;
+  padding: 10px 20px;
+  font-size: 0.82rem;
+  color: #7d6608;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Cards */
+.card {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  margin-top: 24px;
+}
+.card h2 {
+  font-size: 1.15rem;
+  color: var(--blue);
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--blue-pale);
+}
+
+/* Form elements */
+label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 4px;
+  color: var(--gray-600);
+}
+select, input[type="text"], input[type="number"] {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: var(--gray-800);
+  background: #fff;
+  transition: border-color 0.15s;
+}
+select:focus, input:focus { outline: none; border-color: var(--blue-light); box-shadow: 0 0 0 3px rgba(41,128,185,0.12); }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.form-group { display: flex; flex-direction: column; }
+.form-group .hint {
+  font-size: 0.78rem;
+  color: var(--gray-400);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+/* Account list */
+.account-entry {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 14px;
+  position: relative;
+}
+.account-entry .account-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.account-entry .account-header span {
+  font-weight: 700;
+  color: var(--blue);
+  font-size: 0.95rem;
+}
+.account-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.account-grid .full-width { grid-column: 1 / -1; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: #1f6491; }
+.btn-secondary { background: var(--gray-100); color: var(--gray-600); }
+.btn-secondary:hover { background: var(--gray-200); }
+.btn-danger { background: none; color: var(--red); font-size: 0.82rem; padding: 4px 10px; }
+.btn-danger:hover { background: var(--red-bg); }
+.btn-check { background: var(--blue); color: #fff; font-size: 1.05rem; padding: 14px 36px; }
+.btn-check:hover { background: #1f6491; }
+
+.actions-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+/* Checkbox / radio styled */
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.checkbox-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); }
+.checkbox-row label { margin: 0; font-weight: 500; font-size: 0.9rem; color: var(--gray-800); }
+
+/* Results */
+#results { display: none; }
+.result-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+.result-item:last-child { border-bottom: none; }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  min-width: 70px;
+  flex-shrink: 0;
+}
+.badge-yes { background: var(--red-bg); color: var(--red); }
+.badge-no { background: var(--green-bg); color: var(--green); }
+.badge-maybe { background: var(--yellow-bg); color: #b7791f; }
+.result-detail h3 { font-size: 1rem; margin-bottom: 4px; }
+.result-detail p { font-size: 0.88rem; color: var(--gray-600); line-height: 1.55; }
+
+/* Summary table */
+.summary-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.88rem; }
+.summary-table th {
+  text-align: left;
+  padding: 10px 12px;
+  background: var(--blue-pale);
+  color: var(--blue);
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.summary-table td { padding: 10px 12px; border-bottom: 1px solid var(--gray-100); }
+.summary-table tr:last-child td { border-bottom: none; }
+.summary-table .total-row td { font-weight: 700; background: var(--gray-50); border-top: 2px solid var(--gray-200); }
+
+.pfic-flag {
+  display: inline-block;
+  background: var(--yellow-bg);
+  color: #b7791f;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 6px;
+}
+
+/* Educational section */
+.edu-section { margin-top: 28px; }
+.edu-toggle {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--blue);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  transition: background 0.15s;
+}
+.edu-toggle:hover { background: var(--blue-pale); }
+.edu-toggle .arrow { transition: transform 0.2s; font-size: 0.8rem; }
+.edu-toggle.open .arrow { transform: rotate(180deg); }
+.edu-content {
+  display: none;
+  padding: 16px 18px;
+  border: 1px solid var(--gray-200);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  margin-top: -8px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: var(--gray-600);
+  line-height: 1.7;
+  background: #fff;
+}
+.edu-content.open { display: block; }
+.edu-content a { color: var(--blue-light); text-decoration: none; }
+.edu-content a:hover { text-decoration: underline; }
+.edu-content ul { margin: 8px 0 8px 20px; }
+.edu-content li { margin-bottom: 4px; }
+
+/* Tooltip */
+.tip {
+  position: relative;
+  border-bottom: 1px dashed var(--gray-400);
+  cursor: help;
+}
+.tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gray-800);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.4;
+  width: max-content;
+  max-width: 260px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 10;
+  white-space: normal;
+}
+.tip:hover::after { opacity: 1; }
+
+/* CTA */
+.cta-box {
+  text-align: center;
+  padding: 32px 20px;
+  background: var(--blue-pale);
+  border-radius: var(--radius);
+  margin-top: 28px;
+}
+.cta-box h3 { color: var(--blue); font-size: 1.1rem; margin-bottom: 6px; }
+.cta-box p { color: var(--gray-600); font-size: 0.92rem; }
+
+/* Print */
+@media print {
+  body { background: #fff; }
+  header { padding: 16px; }
+  .card { box-shadow: none; border: 1px solid var(--gray-200); }
+  .btn, .actions-row, #account-form, .edu-section { display: none !important; }
+  #results { display: block !important; }
+  .no-print { display: none !important; }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .form-row { grid-template-columns: 1fr; }
+  .account-grid { grid-template-columns: 1fr; }
+  header h1 { font-size: 1.3rem; }
+  .card { padding: 20px 16px; }
+  .result-item { flex-direction: column; gap: 8px; }
+  .summary-table { font-size: 0.8rem; }
+  .summary-table th, .summary-table td { padding: 8px 6px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>FBAR &amp; FATCA Reporting Checker</h1>
+  <div class="subtitle">Philip Stein &amp; Associates</div>
+</header>
+
+<div class="disclaimer-bar">
+  This tool provides general guidance only. Foreign account reporting requirements are complex and depend on your specific circumstances. Consult a qualified tax advisor.
+</div>
+
+<div style="max-width:960px;margin:0 auto;padding:12px 16px 0;"><a href="index.html" style="display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;color:#1a5276;text-decoration:none;font-weight:500;padding:6px 12px;border:1px solid #aed6f1;border-radius:6px;background:#eaf2f8;transition:background .15s;" onmouseover="this.style.background='#d4e6f1'" onmouseout="this.style.background='#eaf2f8'">← All Tools</a></div>
+<div class="container">
+
+  <!-- Personal Info -->
+  <div class="card" id="account-form">
+    <h2>Your Information</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="filing-status">Filing Status</label>
+        <select id="filing-status">
+          <option value="single">Single</option>
+          <option value="mfj">Married Filing Jointly (MFJ)</option>
+          <option value="mfs">Married Filing Separately (MFS)</option>
+          <option value="hoh">Head of Household</option>
+          <option value="qss">Qualifying Surviving Spouse</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="residency">Residency</label>
+        <select id="residency">
+          <option value="us-resident">US Resident</option>
+          <option value="abroad">US Citizen Living Abroad</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="tax-year">Tax Year</label>
+        <select id="tax-year">
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+        </select>
+      </div>
+    </div>
+
+    <h2 style="margin-top: 28px;">Foreign Accounts</h2>
+    <p style="font-size: 0.88rem; color: var(--gray-600); margin-bottom: 16px; margin-top: -10px;">
+      Add each foreign financial account you held at any point during the tax year. Include accounts even if they were closed during the year.
+    </p>
+
+    <div id="accounts-list"></div>
+
+    <div class="actions-row">
+      <button class="btn btn-secondary" onclick="addAccount()">+ Add Account</button>
+    </div>
+
+    <div style="text-align: center; margin-top: 28px;">
+      <button class="btn btn-check" onclick="checkRequirements()">Check My Requirements</button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="card" id="results">
+    <h2>Your Results</h2>
+    <div id="results-body"></div>
+
+    <h2 style="margin-top: 28px;">Account Summary</h2>
+    <div id="summary-table-wrap"></div>
+
+    <div style="text-align: center; margin-top: 20px;" class="no-print">
+      <button class="btn btn-secondary" onclick="window.print()">Print Results</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('results').style.display='none';">Close</button>
+    </div>
+  </div>
+
+  <!-- Educational Section -->
+  <div class="edu-section no-print">
+    <h2 style="color: var(--blue); font-size: 1.1rem; margin-bottom: 14px;">Frequently Asked Questions</h2>
+
+    <button class="edu-toggle" onclick="toggleEdu(this)">
+      What's the difference between FBAR and FATCA? <span class="arrow">&#9660;</span>
+    </button>
+    <div class="edu-content">
+      <p>They're two separate reporting requirements that often apply at the same time:</p>
+      <ul>
+        <li><strong>FBAR (FinCEN 114)</strong> is filed with the <em>US Treasury / Financial Crimes Enforcement Network</em>. It's a separate filing — not part of your tax return. It's filed electronically through the <a href="https://bsaefiling.fincen.treas.gov/" target="_blank" rel="noopener">BSA E-Filing system</a>.</li>
+        <li><strong>FATCA (Form 8938)</strong> is filed with the <em>IRS</em> and is attached to your Form 1040 tax return.</li>
+      </ul>
+      <p>The thresholds are different, the filing methods are different, and the penalties are different — but if you have significant foreign accounts, you'll often need to file both.</p>
+    </div>
+
+    <button class="edu-toggle" onclick="toggleEdu(this)">
+      What if I missed filing in prior years? <span class="arrow">&#9660;</span>
+    </button>
+    <div class="edu-content">
+      <p>Don't panic — you have options. The IRS offers programs to help taxpayers get caught up:</p>
+      <ul>
+        <li><strong>Streamlined Filing Compliance Procedures</strong> — for taxpayers who can certify their failure to file was non-willful (not intentional). There are two tracks: <em>Streamlined Domestic Offshore</em> (for US residents) and <em>Streamlined Foreign Offshore</em> (for those living abroad, with no penalty).</li>
+        <li><strong>Delinquent FBAR Submission Procedures</strong> — if you only need to catch up on FBARs and have already reported all income.</li>
+        <li><strong>Reasonable Cause</strong> — you may avoid penalties if you can show reasonable cause for the late filing.</li>
+      </ul>
+      <p>The most important thing is to come into compliance. Penalties for <em>willful</em> non-filing are severe, but the IRS treats voluntary disclosure much more favorably. A qualified advisor can help you determine the best path.</p>
+    </div>
+
+    <button class="edu-toggle" onclick="toggleEdu(this)">
+      How do I convert foreign currency to USD? <span class="arrow">&#9660;</span>
+    </button>
+    <div class="edu-content">
+      <p>The conversion rules differ by form:</p>
+      <ul>
+        <li><strong>FBAR:</strong> Use the <a href="https://fiscaldata.treasury.gov/datasets/treasury-reporting-rates-exchange/treasury-reporting-rates-of-exchange" target="_blank" rel="noopener">US Treasury exchange rate</a> for December 31 of the reporting year. For the maximum value during the year, use the highest exchange rate during the year that would produce the highest USD value.</li>
+        <li><strong>FATCA (Form 8938):</strong> Use the <a href="https://www.irs.gov/individuals/international-taxpayers/yearly-average-currency-exchange-rates" target="_blank" rel="noopener">IRS year-end exchange rate</a> for the end-of-year balance. For the maximum value, use the exchange rate on the date of the maximum value.</li>
+      </ul>
+      <p><strong>For Israeli accounts:</strong> The NIS → USD conversion should use the Bank of Israel representative rate. You can find historical rates at the <a href="https://www.boi.org.il/en/economic-roles/financial-markets/exchange-rates/" target="_blank" rel="noopener">Bank of Israel website</a>.</p>
+    </div>
+
+    <button class="edu-toggle" onclick="toggleEdu(this)">
+      What are PFICs and why do they matter? <span class="arrow">&#9660;</span>
+    </button>
+    <div class="edu-content">
+      <p>A <strong>PFIC (Passive Foreign Investment Company)</strong> is a foreign-based corporation that meets certain income or asset tests. Most Israeli mutual funds, money market funds, and sub-accounts within pension and provident funds are classified as PFICs.</p>
+      <p>If you own even one share of a PFIC, you're required to file <strong>Form 8621</strong> for each PFIC — there's no minimum balance. The tax treatment of PFICs is generally unfavorable unless you make certain elections (like a QEF or Mark-to-Market election).</p>
+      <p>This is one of the more complex areas of US-Israel cross-border tax — working with a knowledgeable advisor is highly recommended.</p>
+    </div>
+
+    <button class="edu-toggle" onclick="toggleEdu(this)">
+      What about Israeli pensions and provident funds? <span class="arrow">&#9660;</span>
+    </button>
+    <div class="edu-content">
+      <p>Israeli retirement accounts (keren pensia, kupat gemel, keren hishtalmut, etc.) can trigger multiple US reporting requirements:</p>
+      <ul>
+        <li><strong>FBAR & FATCA</strong> — yes, these accounts must be reported if you meet the thresholds.</li>
+        <li><strong>PFIC</strong> — the underlying investments in these accounts are often PFICs (Israeli mutual funds).</li>
+        <li><strong>Form 3520/3520-A</strong> — under some interpretations, Israeli pension and provident funds may be treated as <em>foreign trusts</em>, which require separate reporting. This is a complex and evolving area.</li>
+      </ul>
+      <p>The US-Israel tax treaty may provide some relief, but the reporting requirements generally still apply. Consult a cross-border tax specialist.</p>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-box">
+    <h3>Need help with foreign account reporting?</h3>
+    <p>Contact Philip Stein &amp; Associates for a consultation.</p>
+  </div>
+
+</div>
+
+<script>
+let accountCount = 0;
+
+const ACCOUNT_TYPES = [
+  { value: 'bank', label: 'Bank account (checking/savings)' },
+  { value: 'brokerage', label: 'Brokerage / investment account' },
+  { value: 'mutual_fund', label: 'Mutual fund' },
+  { value: 'pension', label: 'Pension fund (keren pensia)' },
+  { value: 'provident', label: 'Provident fund (kupat gemel / gemel leHashkaa)' },
+  { value: 'education', label: 'Education fund (keren hishtalmut)' },
+  { value: 'life_insurance', label: 'Life insurance with cash value' },
+  { value: 'other', label: 'Other' }
+];
+
+const PFIC_TYPES = new Set(['mutual_fund', 'pension', 'provident', 'education']);
+const TRUST_TYPES = new Set(['pension', 'provident']);
+
+function addAccount() {
+  accountCount++;
+  const id = accountCount;
+  const div = document.createElement('div');
+  div.className = 'account-entry';
+  div.id = 'account-' + id;
+  div.innerHTML = `
+    <div class="account-header">
+      <span>Account #${id}</span>
+      <button class="btn btn-danger" onclick="removeAccount(${id})">Remove</button>
+    </div>
+    <div class="account-grid">
+      <div class="form-group">
+        <label>Account Type</label>
+        <select data-field="type">
+          ${ACCOUNT_TYPES.map(t => `<option value="${t.value}">${t.label}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Institution Name</label>
+        <input type="text" data-field="institution" placeholder="e.g., Bank Hapoalim">
+      </div>
+      <div class="form-group">
+        <label>Country</label>
+        <input type="text" data-field="country" value="Israel">
+      </div>
+      <div class="form-group">
+        <label>Maximum Balance During Year (USD)</label>
+        <input type="number" data-field="max-balance" placeholder="0" min="0" step="0.01">
+        <span class="hint">Convert from local currency using the Dec 31 rate for FATCA, or the highest rate during the year for FBAR.</span>
+      </div>
+      <div class="form-group">
+        <div class="checkbox-row" style="margin-top:18px;">
+          <input type="checkbox" id="joint-${id}" data-field="joint">
+          <label for="joint-${id}">Jointly owned</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="checkbox-row" style="margin-top:18px;">
+          <input type="checkbox" id="reported-${id}" data-field="reported">
+          <label for="reported-${id}">Already reported on a US return</label>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('accounts-list').appendChild(div);
+}
+
+function removeAccount(id) {
+  const el = document.getElementById('account-' + id);
+  if (el) el.remove();
+}
+
+function getAccounts() {
+  const entries = document.querySelectorAll('.account-entry');
+  const accounts = [];
+  entries.forEach(entry => {
+    const get = f => {
+      const el = entry.querySelector(`[data-field="${f}"]`);
+      return el ? (el.type === 'checkbox' ? el.checked : el.value) : '';
+    };
+    const bal = parseFloat(get('max-balance')) || 0;
+    accounts.push({
+      type: get('type'),
+      institution: get('institution') || 'Unnamed account',
+      country: get('country') || 'Israel',
+      maxBalance: bal,
+      joint: get('joint'),
+      reported: get('reported')
+    });
+  });
+  return accounts;
+}
+
+function fmt(n) {
+  return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function typeLabel(type) {
+  const t = ACCOUNT_TYPES.find(a => a.value === type);
+  return t ? t.label : type;
+}
+
+function checkRequirements() {
+  const accounts = getAccounts();
+  if (accounts.length === 0) {
+    alert('Please add at least one foreign account to check.');
+    return;
+  }
+
+  const filingStatus = document.getElementById('filing-status').value;
+  const residency = document.getElementById('residency').value;
+  const taxYear = document.getElementById('tax-year').value;
+
+  const aggregate = accounts.reduce((sum, a) => sum + a.maxBalance, 0);
+
+  // --- FBAR ---
+  const fbarRequired = aggregate > 10000;
+
+  // --- FATCA ---
+  const isMFJ = filingStatus === 'mfj';
+  const isAbroad = residency === 'abroad';
+
+  let fatcaEOY, fatcaAnytime;
+  if (isAbroad) {
+    if (isMFJ) { fatcaEOY = 400000; fatcaAnytime = 600000; }
+    else { fatcaEOY = 200000; fatcaAnytime = 300000; }
+  } else {
+    if (isMFJ) { fatcaEOY = 100000; fatcaAnytime = 150000; }
+    else { fatcaEOY = 50000; fatcaAnytime = 75000; }
+  }
+
+  // Using max balance as proxy for both tests (we only have one value per account)
+  const fatcaTriggeredAnytime = aggregate > fatcaAnytime;
+  const fatcaTriggeredEOY = aggregate > fatcaEOY;
+  const fatcaRequired = fatcaTriggeredAnytime || fatcaTriggeredEOY;
+
+  let fatcaReason = '';
+  if (fatcaTriggeredAnytime && fatcaTriggeredEOY) {
+    fatcaReason = `Your aggregate balance of ${fmt(aggregate)} exceeds both the end-of-year threshold (${fmt(fatcaEOY)}) and the any-time-during-year threshold (${fmt(fatcaAnytime)}).`;
+  } else if (fatcaTriggeredEOY) {
+    fatcaReason = `Your aggregate balance of ${fmt(aggregate)} exceeds the end-of-year threshold of ${fmt(fatcaEOY)}.`;
+  } else if (fatcaTriggeredAnytime) {
+    fatcaReason = `Your aggregate maximum balance of ${fmt(aggregate)} exceeds the any-time-during-year threshold of ${fmt(fatcaAnytime)}.`;
+  }
+
+  // --- PFICs ---
+  const pficAccounts = accounts.filter(a => PFIC_TYPES.has(a.type));
+
+  // --- Form 3520 ---
+  const trustAccounts = accounts.filter(a => TRUST_TYPES.has(a.type));
+
+  // Build results HTML
+  let html = '';
+
+  // FBAR
+  html += `
+    <div class="result-item">
+      <span class="badge ${fbarRequired ? 'badge-yes' : 'badge-no'}">${fbarRequired ? 'REQUIRED' : 'NOT REQUIRED'}</span>
+      <div class="result-detail">
+        <h3>FBAR (FinCEN 114)</h3>
+        <p>${fbarRequired
+          ? `Your aggregate maximum balance of <strong>${fmt(aggregate)}</strong> exceeds the $10,000 threshold. You must file an FBAR reporting all foreign accounts. Due April 15 (automatically extended to October 15). Filed electronically via <span class="tip" data-tip="Bureau of the Fiscal Service — BSA E-Filing System at bsaefiling.fincen.treas.gov">BSA E-Filing</span>.`
+          : `Your aggregate maximum balance of <strong>${fmt(aggregate)}</strong> does not exceed the $10,000 threshold.`
+        }</p>
+      </div>
+    </div>`;
+
+  // FATCA
+  const statusLabel = { single: 'Single', mfj: 'MFJ', mfs: 'MFS', hoh: 'Head of Household', qss: 'Qualifying Surviving Spouse' }[filingStatus];
+  html += `
+    <div class="result-item">
+      <span class="badge ${fatcaRequired ? 'badge-yes' : 'badge-no'}">${fatcaRequired ? 'REQUIRED' : 'NOT REQUIRED'}</span>
+      <div class="result-detail">
+        <h3>FATCA (Form 8938)</h3>
+        <p>${fatcaRequired
+          ? `${fatcaReason} Filing status: ${statusLabel}, ${isAbroad ? 'living abroad' : 'US resident'}. Form 8938 must be attached to your Form 1040.`
+          : `Your aggregate balance of <strong>${fmt(aggregate)}</strong> does not exceed the FATCA thresholds for your filing status (${statusLabel}, ${isAbroad ? 'living abroad' : 'US resident'}): end-of-year ${fmt(fatcaEOY)} / any-time ${fmt(fatcaAnytime)}.`
+        }</p>
+      </div>
+    </div>`;
+
+  // PFICs
+  html += `
+    <div class="result-item">
+      <span class="badge ${pficAccounts.length > 0 ? 'badge-maybe' : 'badge-no'}">${pficAccounts.length > 0 ? 'LIKELY' : 'NONE FLAGGED'}</span>
+      <div class="result-detail">
+        <h3>PFIC Reporting (Form 8621)</h3>
+        ${pficAccounts.length > 0
+          ? `<p>The following accounts likely contain <span class="tip" data-tip="Passive Foreign Investment Company — most non-US mutual funds and pooled investment vehicles">PFICs</span> and may each require a Form 8621:</p>
+             <ul style="margin:8px 0 0 18px;font-size:0.88rem;color:var(--gray-600);">
+               ${pficAccounts.map(a => `<li>${a.institution} (${typeLabel(a.type)})</li>`).join('')}
+             </ul>
+             <p style="margin-top:8px;">There is no minimum balance — if you own any PFIC interest, reporting is required. Consult your tax advisor.</p>`
+          : `<p>None of the accounts you entered are typical PFIC types. Note: if any account holds foreign mutual funds or pooled investments, PFIC rules may still apply.</p>`
+        }
+      </div>
+    </div>`;
+
+  // Form 3520
+  html += `
+    <div class="result-item">
+      <span class="badge ${trustAccounts.length > 0 ? 'badge-maybe' : 'badge-no'}">${trustAccounts.length > 0 ? 'POSSIBLE' : 'NONE FLAGGED'}</span>
+      <div class="result-detail">
+        <h3>Form 3520 / 3520-A (Foreign Trust Reporting)</h3>
+        ${trustAccounts.length > 0
+          ? `<p>Under certain interpretations, these accounts may be classified as foreign trusts:</p>
+             <ul style="margin:8px 0 0 18px;font-size:0.88rem;color:var(--gray-600);">
+               ${trustAccounts.map(a => `<li>${a.institution} (${typeLabel(a.type)})</li>`).join('')}
+             </ul>
+             <p style="margin-top:8px;">This is a complex and evolving area of law. If applicable, Form 3520 (and potentially 3520-A) would be required for any transactions with or distributions from the trust. Consult a cross-border tax specialist.</p>`
+          : `<p>Based on the account types entered, no foreign trust reporting appears to be triggered. However, certain foreign arrangements may still qualify — consult your advisor if unsure.</p>`
+        }
+      </div>
+    </div>`;
+
+  document.getElementById('results-body').innerHTML = html;
+
+  // Summary table
+  let thtml = `<table class="summary-table">
+    <thead><tr>
+      <th>Account</th><th>Type</th><th>Country</th><th style="text-align:right">Max Balance</th><th>Flags</th>
+    </tr></thead><tbody>`;
+  accounts.forEach(a => {
+    const flags = [];
+    if (PFIC_TYPES.has(a.type)) flags.push('<span class="pfic-flag">Likely PFIC</span>');
+    if (TRUST_TYPES.has(a.type)) flags.push('<span class="pfic-flag">Possible Trust</span>');
+    if (a.joint) flags.push('<span class="pfic-flag">Joint</span>');
+    thtml += `<tr>
+      <td>${a.institution}</td>
+      <td>${typeLabel(a.type)}</td>
+      <td>${a.country}</td>
+      <td style="text-align:right">${fmt(a.maxBalance)}</td>
+      <td>${flags.join(' ')}</td>
+    </tr>`;
+  });
+  thtml += `<tr class="total-row">
+    <td colspan="3">Aggregate Maximum Balance</td>
+    <td style="text-align:right">${fmt(aggregate)}</td>
+    <td></td>
+  </tr></tbody></table>`;
+  document.getElementById('summary-table-wrap').innerHTML = thtml;
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function toggleEdu(btn) {
+  btn.classList.toggle('open');
+  const content = btn.nextElementSibling;
+  content.classList.toggle('open');
+}
+
+// Start with one account
+addAccount();
+</script>
+
+</body>
+</html>

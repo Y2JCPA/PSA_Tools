@@ -10,34 +10,66 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .header { background: linear-gradient(135deg, #1a5276, #2980b9); color: white; padding: 3rem 1.5rem; text-align: center; }
 .header h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
 .header p { font-size: 1.1rem; opacity: 0.85; }
-.tools { max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; display: grid; gap: 1.5rem; }
-.tool-card { background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; color: inherit; display: block; }
+.section-title { max-width: 800px; margin: 2rem auto 0.5rem; padding: 0 1.5rem; font-size: 0.85rem; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.06em; }
+.tools { max-width: 800px; margin: 0.5rem auto 0; padding: 0 1.5rem; display: grid; gap: 1rem; }
+.tool-card { background: white; border-radius: 12px; padding: 1.5rem 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; color: inherit; display: block; }
 .tool-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
-.tool-card h2 { color: #1a5276; font-size: 1.4rem; margin-bottom: 0.5rem; }
-.tool-card p { color: #666; line-height: 1.6; }
-.tool-card .badge { display: inline-block; background: #e8f4f8; color: #1a5276; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 1rem; }
+.tool-card h2 { color: #1a5276; font-size: 1.2rem; margin-bottom: 0.4rem; }
+.tool-card p { color: #666; line-height: 1.5; font-size: 0.9rem; }
+.tool-card .badges { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+.badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+.badge-staff { background: #e8f4f8; color: #1a5276; }
+.badge-client { background: #f0fdf4; color: #16a34a; }
+.badge-new { background: #fef3c7; color: #d97706; }
 .footer { text-align: center; padding: 2rem; color: #999; font-size: 0.85rem; }
 </style>
 </head>
 <body>
 <div class="header">
 <h1>🧰 PSA Tools</h1>
-<p>Philip Stein & Associates — Internal Tax Tools</p>
+<p>Philip Stein & Associates — Tax Calculators & Tools</p>
 </div>
+
+<div class="section-title">🔧 Staff Tools</div>
 <div class="tools">
 <a href="irs-penalty-calculator.html" class="tool-card">
 <h2>📋 IRS Interest & Penalty Calculator</h2>
-<p>Calculate late filing penalties, late payment penalties, estimated tax underpayment interest (Form 2210), balance due interest, and reference international form penalties (5471, 5472, 3520, FBAR, 8938, and more).</p>
-<span class="badge">Staff Tool</span>
+<p>Late filing/payment penalties, estimated tax underpayment (Form 2210), balance due interest, and international form penalty reference (5471, 5472, 3520, FBAR, 8938). Includes Israel terror relief adjustments.</p>
+<div class="badges"><span class="badge badge-staff">Staff Tool</span></div>
 </a>
-<a href="retirement-contribution-calculator.html" class="tool-card">
-<h2>💰 401(k) & IRA Contribution Calculator</h2>
-<p>Determine contribution limits for 401(k), Traditional IRA, Roth IRA, SEP IRA, and SIMPLE IRA. Includes catch-up contributions, super catch-up (ages 60-63), deductibility phase-outs, Roth income limits, and US-Israel filer notes.</p>
-<span class="badge">Staff + Client Tool</span>
+<a href="1042s-withholding-calculator.html" class="tool-card">
+<h2>📄 1042-S Withholding Calculator</h2>
+<p>NRA withholding on US-source income. Pre-loaded treaty rates for Israel, Canada, UK, and more. Gross-up calculator and treaty rate reference table.</p>
+<div class="badges"><span class="badge badge-staff">Staff Tool</span><span class="badge badge-new">New</span></div>
+</a>
+<a href="8804-partnership-withholding.html" class="tool-card">
+<h2>🏢 Partnership Withholding (8804/8805)</h2>
+<p>Section 1446 withholding on foreign partners' ECTI. Multi-partner support, installment schedule (8813), and underpayment penalty estimation.</p>
+<div class="badges"><span class="badge badge-staff">Staff Tool</span><span class="badge badge-new">New</span></div>
 </a>
 </div>
+
+<div class="section-title">👤 Staff + Client Tools</div>
+<div class="tools">
+<a href="retirement-contribution-calculator.html" class="tool-card">
+<h2>💰 401(k) & IRA Contribution Calculator</h2>
+<p>Contribution limits for 401(k), Traditional IRA, Roth IRA, SEP IRA, Solo 401(k), and SIMPLE IRA. Includes catch-up contributions, phase-outs, and US-Israel filer notes.</p>
+<div class="badges"><span class="badge badge-staff">Staff Tool</span><span class="badge badge-client">Client Tool</span></div>
+</a>
+<a href="pension-9g-projection.html" class="tool-card">
+<h2>🏦 US Pension Tax Projection — Section 9(g)</h2>
+<p>Calculate federal tax on pension/IRA distributions as sole income. Generates the number needed for Israeli Section 9(g) exemption claims. Full bracket breakdown, printable summary.</p>
+<div class="badges"><span class="badge badge-staff">Staff Tool</span><span class="badge badge-client">Client Tool</span><span class="badge badge-new">New</span></div>
+</a>
+<a href="fbar-fatca-checker.html" class="tool-card">
+<h2>🌍 FBAR & FATCA Reporting Checker</h2>
+<p>Enter your foreign accounts and find out which reporting forms you need. Covers FBAR, FATCA (8938), PFIC flags, and Form 3520 triggers. Designed for clients — clear, friendly, educational.</p>
+<div class="badges"><span class="badge badge-client">Client Tool</span><span class="badge badge-new">New</span></div>
+</a>
+</div>
+
 <div class="footer">
-<p>Internal use only — Philip Stein & Associates © 2026</p>
+<p>Internal use — Philip Stein & Associates © 2026</p>
 </div>
 </body>
 </html>
