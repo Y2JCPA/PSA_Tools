@@ -886,7 +886,8 @@ function updateEffectiveDateDisplays() {
       '<span class="ed-item">Estimated tax deadlines within the relief window (Oct 7, 2023 – Sept 30, 2026) are postponed to <strong>Sept 30, 2026</strong>.</span>';
   } else if (gs.abroad) {
     f2el.innerHTML = '<div class="ed-label">Tax Year ' + gs.year + ' — Lives Abroad</div>' +
-      '<span class="ed-item">Q1 estimated payment deadline moves to Jun 15 (combined with Q2).</span>';
+      '';
+    // Estimated tax deadlines are NOT affected by living abroad
   } else {
     f2el.innerHTML = '<div class="ed-label">Tax Year ' + gs.year + '</div>' +
       '<span class="ed-item">Standard estimated tax deadlines apply.</span>';
@@ -894,7 +895,7 @@ function updateEffectiveDateDisplays() {
 
   // Update quarter labels
   const y = gs.year;
-  const q1Label = gs.abroad ? `Q1 (Jun 15, ${y})` : `Q1 (Apr 15, ${y})`;
+  const q1Label = `Q1 (Apr 15, ${y})`; // Estimated tax not affected by abroad
   document.getElementById('f2-q1-label').textContent = q1Label;
   document.getElementById('f2-q2-label').textContent = `Q2 (Jun 15, ${y})`;
   document.getElementById('f2-q3-label').textContent = `Q3 (Sep 15, ${y})`;
@@ -1075,7 +1076,7 @@ function calcEstimated() {
   const whPerQ = withholding / 4;
 
   // Quarter due dates
-  const q1Due = gs.abroad ? new Date(year, 5, 15) : new Date(year, 3, 15); // Jun 15 if abroad
+  const q1Due = new Date(year, 3, 15); // Always Apr 15 - abroad doesn't affect estimated tax
   let qDates = [
     { label: 'Q1', due: q1Due, end: new Date(year, 5, 15) },
     { label: 'Q2', due: new Date(year, 5, 15), end: new Date(year, 8, 15) },
@@ -1084,7 +1085,7 @@ function calcEstimated() {
   ];
   // If abroad, Q1 end = Q2 end since they share the Jun 15 due date
   if (gs.abroad) {
-    qDates[0].end = new Date(year, 5, 15); // No interest period for Q1 if paid by Jun 15
+    // (removed: abroad does not affect estimated tax dates)
   }
 
   // If Israel relief, adjust due dates that fall within the relief window
