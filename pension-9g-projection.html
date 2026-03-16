@@ -92,7 +92,7 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
     <div class="form-row">
       <div class="form-group narrow">
         <label for="taxYear">Tax Year</label>
-        <select id="taxYear"><option value="2025">2025</option><option value="2024">2024</option></select>
+        <select id="taxYear"><option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option></select>
       </div>
       <div class="form-group">
         <label for="filingStatus">Filing Status</label>
@@ -166,6 +166,17 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 
 <script>
 const TAX_DATA = {
+  2026: {
+    standardDeduction: { single: 15350, mfj: 30700, mfs: 15350, hoh: 22500, qss: 30700 },
+    elderlyAdd: { single: 2000, mfj: 1600, mfs: 1600, hoh: 2000, qss: 1600 },
+    brackets: {
+      single: [[11925,.10],[48475,.12],[103350,.22],[197300,.24],[250525,.32],[626350,.35],[Infinity,.37]],
+      mfj:    [[23850,.10],[96950,.12],[206700,.22],[394600,.24],[501050,.32],[751600,.35],[Infinity,.37]],
+      mfs:    [[11925,.10],[48475,.12],[103350,.22],[197300,.24],[250525,.32],[375800,.35],[Infinity,.37]],
+      hoh:    [[17000,.10],[64850,.12],[103350,.22],[197300,.24],[250525,.32],[626350,.35],[Infinity,.37]],
+      qss:    [[23850,.10],[96950,.12],[206700,.22],[394600,.24],[501050,.32],[751600,.35],[Infinity,.37]]
+    }
+  },
   2025: {
     standardDeduction: { single: 15350, mfj: 30700, mfs: 15350, hoh: 22500, qss: 30700 },
     elderlyAdd: { single: 2000, mfj: 1600, mfs: 1600, hoh: 2000, qss: 1600 },
@@ -370,6 +381,21 @@ function calculate() {
   notes += `<div class="note"><strong>State Tax:</strong> This calculator covers federal income tax only. Some US states also tax pension income, which could increase the total US tax available for the 9(g) credit.</div>`;
   notes += `<div class="note"><strong>Treaty Coordination:</strong> The 9(g) exemption applies to pension income from a foreign country where the income was taxed. The foreign tax credit under the US-Israel tax treaty may also apply. Coordinate with both your Israeli and US tax advisors.</div>`;
   document.getElementById('notesSection').innerHTML = notes;
+
+  // 2026 estimate notice
+  let estimateNotice = document.getElementById('estimateNotice');
+  if (!estimateNotice) {
+    estimateNotice = document.createElement('div');
+    estimateNotice.id = 'estimateNotice';
+    estimateNotice.className = 'note warning';
+    document.getElementById('notesSection').prepend(estimateNotice);
+  }
+  if (year === 2026) {
+    estimateNotice.innerHTML = '<strong>⚠️ 2026 tax brackets and deductions are estimates based on 2025 values.</strong> Official IRS figures will be announced in late 2026.';
+    estimateNotice.style.display = '';
+  } else {
+    estimateNotice.style.display = 'none';
+  }
 
   document.getElementById('results').style.display = 'block';
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });

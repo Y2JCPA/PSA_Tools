@@ -403,6 +403,7 @@ body {
       <div class="form-group">
         <label>Tax Year</label>
         <select id="gs-year">
+          <option value="2026">2026</option>
           <option value="2025" selected>2025</option>
           <option value="2024">2024</option>
           <option value="2023">2023</option>
@@ -428,6 +429,25 @@ body {
       </div>
       <div class="extension-note" id="gs-extension-note" style="display:none;">
         <strong>Note:</strong> An extension extends the <em>filing</em> deadline to Oct 15, but does <strong>not</strong> extend the <em>payment</em> deadline — tax is still due Apr 15. Interest and failure-to-pay penalties accrue from the original due date.
+      </div>
+    </div>
+
+    <div class="extension-row">
+      <div class="checkbox-row" style="margin-top:0">
+        <input type="checkbox" id="gs-abroad">
+        <label for="gs-abroad"><strong>🌍 US citizen/resident living abroad</strong> (automatic 2-month extension)</label>
+      </div>
+      <div id="gs-abroad-box" class="israel-relief-box" style="background:var(--blue-pale);border-color:var(--blue-border);">
+        <h4 style="color:var(--blue);">Living Abroad — Automatic 2-Month Extension</h4>
+        <ul>
+          <li>US citizens and residents living outside the US and Puerto Rico get an <strong>automatic 2-month extension</strong> to file and pay (to <strong>June 15</strong>).</li>
+          <li><strong>No form needed</strong> — just attach a statement to the return explaining you qualify.</li>
+          <li><strong>However:</strong> Interest on unpaid tax still runs from the original April 15 deadline.</li>
+          <li>This is <em>different</em> from Form 4868 — you can file Form 4868 in addition to get until Oct 15 to file.</li>
+        </ul>
+        <div class="covered-list">
+          <strong>Effect on penalties:</strong> Payment penalty (FTP) starts from June 15, but interest accrues from April 15. If an extension is also filed, filing deadline moves to Oct 15 while payment penalty start stays June 15.
+        </div>
       </div>
     </div>
 
@@ -707,19 +727,30 @@ function getGlobalSettings() {
   const hasExtension = document.getElementById('gs-extension').checked;
   const extendedDue = hasExtension ? parseDate('gs-ext-due') : null;
   const israelRelief = document.getElementById('gs-israel').checked;
+  const abroad = document.getElementById('gs-abroad').checked;
 
   // Determine effective filing due date
   let filingDue = originalDue;
-  let paymentDue = originalDue;
+  let paymentDue = originalDue; // For FTP penalty start
+  let interestStart = new Date(originalDue); // For interest — always Apr 15
+
+  // Abroad: automatic 2-month extension to Jun 15 for filing and payment penalty
+  if (abroad) {
+    const jun15 = new Date(year, 5, 15); // June 15
+    filingDue = jun15;
+    paymentDue = jun15; // FTP penalty starts from Jun 15
+    // interestStart stays at Apr 15
+  }
 
   if (hasExtension && extendedDue) {
-    filingDue = extendedDue; // Extension extends filing deadline
-    // Payment deadline stays at original due date
+    filingDue = extendedDue; // Extension overrides abroad for filing deadline
+    // paymentDue: if abroad, stays Jun 15; if not abroad, stays Apr 15 (original)
   }
 
   // Israel relief: if the due date falls in the relief window, extend to Sept 30, 2026
   let israelAppliesFile = false;
   let israelAppliesPay = false;
+  let israelAppliesInterest = false;
   if (israelRelief) {
     if (isInReliefWindow(filingDue)) {
       filingDue = new Date('2026-09-30T00:00:00');
@@ -729,6 +760,10 @@ function getGlobalSettings() {
       paymentDue = new Date('2026-09-30T00:00:00');
       israelAppliesPay = true;
     }
+    if (isInReliefWindow(interestStart)) {
+      interestStart = new Date('2026-09-30T00:00:00');
+      israelAppliesInterest = true;
+    }
   }
 
   return {
@@ -737,10 +772,13 @@ function getGlobalSettings() {
     hasExtension,
     extendedDue,
     israelRelief,
+    abroad,
     filingDue,
     paymentDue,
+    interestStart,
     israelAppliesFile,
     israelAppliesPay,
+    israelAppliesInterest,
   };
 }
 
@@ -757,6 +795,7 @@ function updateGlobalUI() {
   }
 
   updateExtensionUI();
+  updateAbroadUI();
   updateIsraelUI();
   updateEffectiveDateDisplays();
 }
@@ -784,6 +823,19 @@ function updateExtensionUI() {
   updateEffectiveDateDisplays();
 }
 
+function updateAbroadUI() {
+  const checked = document.getElementById('gs-abroad').checked;
+  const box = document.getElementById('gs-abroad-box');
+
+  if (checked) {
+    box.classList.add('visible');
+  } else {
+    box.classList.remove('visible');
+  }
+
+  updateEffectiveDateDisplays();
+}
+
 function updateIsraelUI() {
   const checked = document.getElementById('gs-israel').checked;
   const box = document.getElementById('gs-israel-box');
@@ -807,17 +859,23 @@ function updateEffectiveDateDisplays() {
   f1html += `<span class="ed-item"><strong>Filing deadline:</strong> ${fmtDate(gs.filingDue)}`;
   if (gs.israelAppliesFile) f1html += ' <span class="ed-relief">(Israel relief)</span>';
   else if (gs.hasExtension) f1html += ' <span style="color:var(--orange)">(extension)</span>';
+  else if (gs.abroad) f1html += ' <span style="color:var(--blue-light)">(lives abroad)</span>';
   f1html += '</span>';
-  f1html += `<span class="ed-item"><strong>Payment deadline:</strong> ${fmtDate(gs.paymentDue)}`;
+  f1html += `<span class="ed-item"><strong>Payment penalty starts:</strong> ${fmtDate(gs.paymentDue)}`;
   if (gs.israelAppliesPay) f1html += ' <span class="ed-relief">(Israel relief)</span>';
+  else if (gs.abroad) f1html += ' <span style="color:var(--blue-light)">(lives abroad)</span>';
+  f1html += '</span>';
+  f1html += `<span class="ed-item"><strong>Interest starts:</strong> ${fmtDate(gs.interestStart)}`;
+  if (gs.israelAppliesInterest) f1html += ' <span class="ed-relief">(Israel relief)</span>';
   f1html += '</span>';
   f1el.innerHTML = f1html;
 
   // Balance section
   const f3el = document.getElementById('f3-effective');
   let f3html = '<div class="ed-label">Effective Dates for This Calculation</div>';
-  f3html += `<span class="ed-item"><strong>Payment deadline:</strong> ${fmtDate(gs.paymentDue)}`;
-  if (gs.israelAppliesPay) f3html += ' <span class="ed-relief">(Israel relief)</span>';
+  f3html += `<span class="ed-item"><strong>Interest starts:</strong> ${fmtDate(gs.interestStart)}`;
+  if (gs.israelAppliesInterest) f3html += ' <span class="ed-relief">(Israel relief)</span>';
+  else if (gs.abroad) f3html += ' <span style="color:var(--blue-light)">(interest still runs from Apr 15)</span>';
   f3html += '</span>';
   f3el.innerHTML = f3html;
 
@@ -826,6 +884,9 @@ function updateEffectiveDateDisplays() {
   if (gs.israelRelief) {
     f2el.innerHTML = '<div class="ed-label">Israel Terror Relief Active</div>' +
       '<span class="ed-item">Estimated tax deadlines within the relief window (Oct 7, 2023 – Sept 30, 2026) are postponed to <strong>Sept 30, 2026</strong>.</span>';
+  } else if (gs.abroad) {
+    f2el.innerHTML = '<div class="ed-label">Tax Year ' + gs.year + ' — Lives Abroad</div>' +
+      '<span class="ed-item">Q1 estimated payment deadline moves to Jun 15 (combined with Q2).</span>';
   } else {
     f2el.innerHTML = '<div class="ed-label">Tax Year ' + gs.year + '</div>' +
       '<span class="ed-item">Standard estimated tax deadlines apply.</span>';
@@ -833,7 +894,8 @@ function updateEffectiveDateDisplays() {
 
   // Update quarter labels
   const y = gs.year;
-  document.getElementById('f2-q1-label').textContent = `Q1 (Apr 15, ${y})`;
+  const q1Label = gs.abroad ? `Q1 (Jun 15, ${y})` : `Q1 (Apr 15, ${y})`;
+  document.getElementById('f2-q1-label').textContent = q1Label;
   document.getElementById('f2-q2-label').textContent = `Q2 (Jun 15, ${y})`;
   document.getElementById('f2-q3-label').textContent = `Q3 (Sep 15, ${y})`;
   document.getElementById('f2-q4-label').textContent = `Q4 (Jan 15, ${y + 1})`;
@@ -855,6 +917,7 @@ document.getElementById('gs-ext-due').addEventListener('change', function() {
   updateIsraelUI();
   updateEffectiveDateDisplays();
 });
+document.getElementById('gs-abroad').addEventListener('change', updateAbroadUI);
 document.getElementById('gs-israel').addEventListener('change', updateIsraelUI);
 document.getElementById('gs-due').addEventListener('change', function() {
   updateIsraelUI();
@@ -888,11 +951,12 @@ function calcFiling() {
   }
 
   const filingDue = gs.filingDue;
-  const paymentDue = gs.paymentDue;
+  const paymentDue = gs.paymentDue; // For FTP penalty
+  const interestStart = gs.interestStart; // For interest calculation
 
   // Check if Israel relief covers everything
   if (gs.israelRelief && filed <= new Date('2026-09-30T00:00:00') && paid <= new Date('2026-09-30T00:00:00') &&
-      gs.israelAppliesFile && gs.israelAppliesPay) {
+      gs.israelAppliesFile && gs.israelAppliesPay && gs.israelAppliesInterest) {
     el.innerHTML = '';
     document.getElementById('gs-israel-green').classList.add('visible');
     el.classList.add('hidden');
@@ -941,8 +1005,9 @@ function calcFiling() {
   html += `<div class="result-card rc-teal">
     <div class="rc-header">Effective Dates Used</div>
     <table class="result-table"><tbody>
-      <tr><td>Filing deadline</td><td class="text-right">${fmtDate(filingDue)}${gs.israelAppliesFile ? ' (Israel relief)' : gs.hasExtension ? ' (extension)' : ''}</td></tr>
-      <tr><td>Payment deadline</td><td class="text-right">${fmtDate(paymentDue)}${gs.israelAppliesPay ? ' (Israel relief)' : ''}</td></tr>
+      <tr><td>Filing deadline</td><td class="text-right">${fmtDate(filingDue)}${gs.israelAppliesFile ? ' (Israel relief)' : gs.hasExtension ? ' (extension)' : gs.abroad ? ' (lives abroad)' : ''}</td></tr>
+      <tr><td>Payment penalty starts</td><td class="text-right">${fmtDate(paymentDue)}${gs.israelAppliesPay ? ' (Israel relief)' : gs.abroad ? ' (lives abroad)' : ''}</td></tr>
+      <tr><td>Interest starts</td><td class="text-right">${fmtDate(interestStart)}${gs.israelAppliesInterest ? ' (Israel relief)' : ''}</td></tr>
     </tbody></table>
   </div>`;
 
@@ -1010,12 +1075,17 @@ function calcEstimated() {
   const whPerQ = withholding / 4;
 
   // Quarter due dates
+  const q1Due = gs.abroad ? new Date(year, 5, 15) : new Date(year, 3, 15); // Jun 15 if abroad
   let qDates = [
-    { label: 'Q1', due: new Date(year, 3, 15), end: new Date(year, 5, 15) },
+    { label: 'Q1', due: q1Due, end: new Date(year, 5, 15) },
     { label: 'Q2', due: new Date(year, 5, 15), end: new Date(year, 8, 15) },
     { label: 'Q3', due: new Date(year, 8, 15), end: new Date(year + 1, 0, 15) },
     { label: 'Q4', due: new Date(year + 1, 0, 15), end: new Date(year + 1, 3, 15) },
   ];
+  // If abroad, Q1 end = Q2 end since they share the Jun 15 due date
+  if (gs.abroad) {
+    qDates[0].end = new Date(year, 5, 15); // No interest period for Q1 if paid by Jun 15
+  }
 
   // If Israel relief, adjust due dates that fall within the relief window
   if (gs.israelRelief) {
@@ -1107,7 +1177,7 @@ function calcEstimated() {
 function calcBalance() {
   const gs = getGlobalSettings();
   const balance = parseNum('f3-balance');
-  const due = gs.paymentDue; // Use effective payment due date
+  const due = gs.interestStart; // Interest always runs from Apr 15 (or Israel relief date)
   const paid = parseDate('f3-paid');
   const el = document.getElementById('f3-results');
 
@@ -1118,7 +1188,7 @@ function calcBalance() {
   }
 
   // Check Israel relief
-  if (gs.israelRelief && gs.israelAppliesPay && paid <= new Date('2026-09-30T00:00:00')) {
+  if (gs.israelRelief && gs.israelAppliesInterest && paid <= new Date('2026-09-30T00:00:00')) {
     el.innerHTML = '';
     document.getElementById('gs-israel-green').classList.add('visible');
     el.classList.add('hidden');

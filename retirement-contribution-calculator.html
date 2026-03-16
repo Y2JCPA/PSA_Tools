@@ -323,6 +323,7 @@ header p { font-size: .88rem; opacity: .82; margin-top: 4px; }
       <div class="form-group">
         <label>Tax Year</label>
         <select id="taxYear">
+          <option value="2026">2026 (estimated)</option>
           <option value="2025" selected>2025</option>
           <option value="2024">2024</option>
         </select>
@@ -416,6 +417,7 @@ header p { font-size: .88rem; opacity: .82; margin-top: 4px; }
 
   <!-- Results -->
   <div id="results">
+    <div id="estimateNotice" class="hidden" style="background:var(--yellow-bg);border:1px solid var(--yellow);border-radius:var(--radius);padding:14px 18px;margin-bottom:4px;font-size:.88rem;color:#7d6608;">&#9888;&#65039; 2026 limits are estimates based on 2025 values. Official IRS limits for 2026 will be announced in late 2026.</div>
     <div id="summaryCard" class="summary-card">
       <h3>Combined Maximum Contribution Potential</h3>
       <div class="big-number" id="totalMax">—</div>
@@ -547,6 +549,33 @@ function noteBox(text) {
 
 // --- Limit data ---
 var LIMITS = {
+  2026: {
+    deferral401k: 23500,
+    catchUp401k: 7500,
+    superCatchUp401k: 11250,
+    totalLimit401k: 70000,
+    iraBase: 7000,
+    iraCatchUp: 1000,
+    tradPhaseOut: {
+      single: [79000, 89000],
+      hoh: [79000, 89000],
+      mfj_has_plan: [126000, 146000],
+      mfj_no_plan_spouse_has: [236000, 246000],
+      mfs: [0, 10000],
+      qss: [126000, 146000]
+    },
+    rothPhaseOut: {
+      single: [150000, 165000],
+      hoh: [150000, 165000],
+      mfj: [236000, 246000],
+      mfs: [0, 10000],
+      qss: [236000, 246000]
+    },
+    sepMax: 70000,
+    simpleBase: 16500,
+    simpleCatchUp: 3500,
+    simpleSuperCatchUp: 5250
+  },
   2025: {
     deferral401k: 23500,
     catchUp401k: 7500,
@@ -907,6 +936,9 @@ function calculate() {
   } else {
     document.getElementById('combinedLimitNote').classList.add('hidden');
   }
+
+  // ===== 2026 Estimate Notice =====
+  document.getElementById('estimateNotice').classList.toggle('hidden', year !== 2026);
 
   // ===== Summary =====
   document.getElementById('totalMax').textContent = fmt(totalMax);
