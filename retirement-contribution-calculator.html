@@ -382,6 +382,18 @@ header p { font-size: .88rem; opacity: .82; margin-top: 4px; }
         <input type="text" id="seIncome" placeholder="e.g. 100000" inputmode="numeric">
       </div>
 
+      <div class="form-group full hidden" id="sePlanTypeGroup">
+        <label style="margin-bottom:6px;">Self-Employed Retirement Plan Type</label>
+        <div class="check-group" style="gap:20px;">
+          <label style="font-size:.88rem;font-weight:400;margin-bottom:0;display:flex;align-items:center;gap:4px;">
+            <input type="radio" name="sePlanType" value="sep" checked style="width:16px;height:16px;accent-color:var(--blue);"> SEP IRA
+          </label>
+          <label style="font-size:.88rem;font-weight:400;margin-bottom:0;display:flex;align-items:center;gap:4px;">
+            <input type="radio" name="sePlanType" value="solo401k" style="width:16px;height:16px;accent-color:var(--blue);"> Solo 401(k)
+          </label>
+        </div>
+      </div>
+
       <div class="form-group full">
         <div class="check-group">
           <input type="checkbox" id="hasSimple">
@@ -453,6 +465,15 @@ header p { font-size: .88rem; opacity: .82; margin-top: 4px; }
       <div class="result-card-body open" id="bodySEP"></div>
     </div>
 
+    <!-- Solo 401(k) -->
+    <div class="result-card hidden" id="cardSolo401k">
+      <div class="result-card-header open" onclick="toggleCard(this)">
+        <h3><span id="badgeSolo401k" class="status-badge status-green">Eligible</span> Solo 401(k)</h3>
+        <span class="arrow">&#9654;</span>
+      </div>
+      <div class="result-card-body open" id="bodySolo401k"></div>
+    </div>
+
     <!-- SIMPLE IRA -->
     <div class="result-card hidden" id="cardSIMPLE">
       <div class="result-card-header open" onclick="toggleCard(this)">
@@ -460,6 +481,11 @@ header p { font-size: .88rem; opacity: .82; margin-top: 4px; }
         <span class="arrow">&#9654;</span>
       </div>
       <div class="result-card-body open" id="bodySIMPLE"></div>
+    </div>
+
+    <!-- Combined Limit Note -->
+    <div class="note hidden" id="combinedLimitNote" style="margin-top:16px;font-size:.88rem;border-left-width:4px;border-left-color:var(--yellow);background:var(--yellow-bg);padding:14px 18px;">
+      <strong>Combined 401(k) Deferral Limit:</strong> The 401(k) employee deferral limit (<span id="combinedLimitAmt"></span> for <span id="combinedLimitYear"></span>) is a <strong>COMBINED</strong> limit across ALL employers. If you have multiple jobs with 401(k) access, or a W-2 job + Solo 401(k), the total employee deferrals cannot exceed this limit. However, employer contributions are per-plan.
     </div>
 
     <!-- Israel Notes -->
@@ -491,6 +517,7 @@ document.getElementById('filingStatus').addEventListener('change', function() {
 });
 document.getElementById('isSelfEmployed').addEventListener('change', function() {
   document.getElementById('seIncomeGroup').classList.toggle('hidden', !this.checked);
+  document.getElementById('sePlanTypeGroup').classList.toggle('hidden', !this.checked);
 });
 
 // --- UI helpers ---
@@ -637,34 +664,43 @@ function calculate() {
   var max401k = base401k + catchUp401k;
   var remaining401k = Math.max(0, max401k - ytd);
 
-  var html401k = row('Employee Deferral Limit', fmt(base401k));
-  if (is50Plus) {
-    var catchUpLabel = isSuperCatchUp ? 'Super Catch-Up (ages 60–63)' : 'Catch-Up (age 50+)';
-    html401k += row(catchUpLabel, '+ ' + fmt(catchUp401k));
-  }
-  html401k += row('<strong>Maximum Employee Contribution</strong>', '<strong>' + fmt(max401k) + '</strong>');
-  html401k += row('Total Limit (employee + employer)', fmt(L.totalLimit401k));
-  if (ytd > 0) {
-    html401k += row('YTD Contributions', fmt(ytd));
-    html401k += row('<strong>Remaining Room</strong>', '<strong>' + fmt(remaining401k) + '</strong>');
-  }
-  document.getElementById('body401k').innerHTML = html401k;
-  document.getElementById('badge401k').textContent = 'Eligible';
-  document.getElementById('badge401k').className = 'status-badge status-green';
-  totalMax += max401k;
+  if (hasWorkPlan) {
+    document.getElementById('card401k').classList.remove('hidden');
+    document.getElementById('cardRoth401k').classList.remove('hidden');
 
-  // ===== Roth 401(k) =====
-  var htmlRoth401k = row('Employee Deferral Limit', fmt(base401k));
-  if (is50Plus) {
-    var catchUpLabel2 = isSuperCatchUp ? 'Super Catch-Up (ages 60–63)' : 'Catch-Up (age 50+)';
-    htmlRoth401k += row(catchUpLabel2, '+ ' + fmt(catchUp401k));
+    var html401k = row('Employee Deferral Limit', fmt(base401k));
+    if (is50Plus) {
+      var catchUpLabel = isSuperCatchUp ? 'Super Catch-Up (ages 60–63)' : 'Catch-Up (age 50+)';
+      html401k += row(catchUpLabel, '+ ' + fmt(catchUp401k));
+    }
+    html401k += row('<strong>Maximum Employee Contribution</strong>', '<strong>' + fmt(max401k) + '</strong>');
+    html401k += row('Total Limit (employee + employer)', fmt(L.totalLimit401k));
+    if (ytd > 0) {
+      html401k += row('YTD Contributions', fmt(ytd));
+      html401k += row('<strong>Remaining Room</strong>', '<strong>' + fmt(remaining401k) + '</strong>');
+    }
+    html401k += noteBox('These limits apply only if your employer offers a US-qualified 401(k)/403(b) plan. Foreign employers (e.g., Israeli companies) generally do not offer US retirement plans. If your employer does not offer a 401(k), these limits do not apply to you — see IRA options below.');
+    document.getElementById('body401k').innerHTML = html401k;
+    document.getElementById('badge401k').textContent = 'Eligible';
+    document.getElementById('badge401k').className = 'status-badge status-green';
+    totalMax += max401k;
+
+    // ===== Roth 401(k) =====
+    var htmlRoth401k = row('Employee Deferral Limit', fmt(base401k));
+    if (is50Plus) {
+      var catchUpLabel2 = isSuperCatchUp ? 'Super Catch-Up (ages 60–63)' : 'Catch-Up (age 50+)';
+      htmlRoth401k += row(catchUpLabel2, '+ ' + fmt(catchUp401k));
+    }
+    htmlRoth401k += row('<strong>Maximum Roth 401(k) Contribution</strong>', '<strong>' + fmt(max401k) + '</strong>');
+    htmlRoth401k += noteBox('Roth 401(k) contributions share the same limit as Traditional 401(k) — the ' + fmt(max401k) + ' limit is combined, not additive. No income phase-out applies. Available only if your employer offers this option.');
+    document.getElementById('bodyRoth401k').innerHTML = htmlRoth401k;
+    document.getElementById('badgeRoth401k').textContent = 'No Income Limit';
+    document.getElementById('badgeRoth401k').className = 'status-badge status-green';
+    // Don't add to totalMax — shared with 401k
+  } else {
+    document.getElementById('card401k').classList.add('hidden');
+    document.getElementById('cardRoth401k').classList.add('hidden');
   }
-  htmlRoth401k += row('<strong>Maximum Roth 401(k) Contribution</strong>', '<strong>' + fmt(max401k) + '</strong>');
-  htmlRoth401k += noteBox('Roth 401(k) contributions share the same limit as Traditional 401(k) — the ' + fmt(max401k) + ' limit is combined, not additive. No income phase-out applies. Available only if your employer offers this option.');
-  document.getElementById('bodyRoth401k').innerHTML = htmlRoth401k;
-  document.getElementById('badgeRoth401k').textContent = 'No Income Limit';
-  document.getElementById('badgeRoth401k').className = 'status-badge status-green';
-  // Don't add to totalMax — shared with 401k
 
   // ===== Traditional IRA =====
   var iraMax = L.iraBase + (is50Plus ? L.iraCatchUp : 0);
@@ -772,14 +808,13 @@ function calculate() {
   document.getElementById('bodyRothIRA').innerHTML = htmlRoth;
   // Don't add Roth to totalMax — shared with Traditional IRA
 
-  // ===== SEP IRA =====
-  if (isSE && seIncome > 0) {
+  // ===== SEP IRA / Solo 401(k) =====
+  var sePlanType = document.querySelector('input[name="sePlanType"]:checked').value;
+
+  if (isSE && seIncome > 0 && sePlanType === 'sep') {
     document.getElementById('cardSEP').classList.remove('hidden');
+    document.getElementById('cardSolo401k').classList.add('hidden');
     // SEP: 25% of net SE income after 1/2 SE tax deduction
-    // Simplified: ~92.35% of net SE income, then 25% of that, but commonly approximated as 20% of net
-    // More precisely: contribution = net_se * 0.9235 * 0.25 = net_se * 0.2309
-    // But the common planning number is 25% of (net - 1/2 SE tax)
-    // SE tax = net * 0.9235 * 0.153 (up to SS wage base, but we'll simplify)
     var seTax = seIncome * 0.9235 * 0.153;
     var adjustedSE = seIncome - (seTax / 2);
     var sepContrib = Math.min(adjustedSE * 0.25, L.sepMax);
@@ -796,8 +831,38 @@ function calculate() {
     document.getElementById('badgeSEP').textContent = 'Eligible';
     document.getElementById('badgeSEP').className = 'status-badge status-green';
     totalMax += sepContrib;
+  } else if (isSE && seIncome > 0 && sePlanType === 'solo401k') {
+    document.getElementById('cardSEP').classList.add('hidden');
+    document.getElementById('cardSolo401k').classList.remove('hidden');
+
+    // Solo 401(k): employee deferral + employer contribution
+    var employeeDeferral = max401k; // same as regular 401(k) deferral limits
+    var seTax = seIncome * 0.9235 * 0.153;
+    var adjustedSE = seIncome - (seTax / 2);
+    var employerContrib = Math.min(adjustedSE * 0.25, L.sepMax);
+    employerContrib = Math.max(0, employerContrib);
+    var solo401kTotal = Math.min(employeeDeferral + employerContrib, L.totalLimit401k);
+
+    var htmlSolo = row('Employee Deferral Limit', fmt(base401k));
+    if (is50Plus) {
+      var soloCULabel = isSuperCatchUp ? 'Super Catch-Up (ages 60–63)' : 'Catch-Up (age 50+)';
+      htmlSolo += row(soloCULabel, '+ ' + fmt(catchUp401k));
+    }
+    htmlSolo += row('<strong>Max Employee Deferral</strong>', '<strong>' + fmt(employeeDeferral) + '</strong>');
+    htmlSolo += row('Net Self-Employment Income', fmt(seIncome));
+    htmlSolo += row('Adjusted for ½ SE Tax', fmt(adjustedSE));
+    htmlSolo += row('Employer Contribution (25% of adjusted)', fmt(employerContrib));
+    htmlSolo += row('Annual Total Limit', fmt(L.totalLimit401k));
+    htmlSolo += row('<strong>Your Solo 401(k) Limit</strong>', '<strong>' + fmt(solo401kTotal) + '</strong>');
+    htmlSolo += noteBox('Solo 401(k) is only available if you have no full-time W-2 employees other than your spouse. The employee deferral portion requires earned income from self-employment — W-2 income from a foreign employer does not qualify.');
+
+    document.getElementById('bodySolo401k').innerHTML = htmlSolo;
+    document.getElementById('badgeSolo401k').textContent = 'Eligible';
+    document.getElementById('badgeSolo401k').className = 'status-badge status-green';
+    totalMax += solo401kTotal;
   } else {
     document.getElementById('cardSEP').classList.add('hidden');
+    document.getElementById('cardSolo401k').classList.add('hidden');
   }
 
   // ===== SIMPLE IRA =====
@@ -826,6 +891,16 @@ function calculate() {
     totalMax += simpleMax;
   } else {
     document.getElementById('cardSIMPLE').classList.add('hidden');
+  }
+
+  // ===== Combined Limit Note =====
+  var showCombinedNote = hasWorkPlan || (isSE && seIncome > 0 && sePlanType === 'solo401k');
+  if (showCombinedNote) {
+    document.getElementById('combinedLimitNote').classList.remove('hidden');
+    document.getElementById('combinedLimitAmt').textContent = fmt(max401k);
+    document.getElementById('combinedLimitYear').textContent = year;
+  } else {
+    document.getElementById('combinedLimitNote').classList.add('hidden');
   }
 
   // ===== Summary =====
