@@ -26,6 +26,9 @@
   --green-bg: #f0fdf4;
   --orange: #ea580c;
   --orange-bg: #fff7ed;
+  --teal: #0d9488;
+  --teal-bg: #f0fdfa;
+  --teal-border: #99f6e4;
   --radius: 8px;
   --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
   --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
@@ -51,6 +54,80 @@ body {
 
 /* Container */
 .container { max-width: 960px; margin: 0 auto; padding: 20px 16px 40px; }
+
+/* Global Settings */
+.global-settings {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  border-left: 4px solid var(--blue);
+}
+.global-settings h3 {
+  font-size: 0.9rem;
+  color: var(--blue);
+  margin-bottom: 12px;
+}
+.gs-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+.gs-row .form-group { flex: 0 0 auto; min-width: 150px; }
+
+.extension-row {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--gray-200);
+}
+.extension-fields {
+  display: none;
+  margin-top: 8px;
+}
+.extension-fields.visible { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+.extension-note {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+/* Israel Relief */
+.israel-relief-row {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--gray-200);
+}
+.israel-relief-box {
+  display: none;
+  margin-top: 12px;
+  padding: 16px;
+  background: var(--teal-bg);
+  border: 1px solid var(--teal-border);
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  color: var(--gray-700);
+  line-height: 1.6;
+}
+.israel-relief-box.visible { display: block; }
+.israel-relief-box h4 { color: var(--teal); font-size: 0.85rem; margin-bottom: 8px; }
+.israel-relief-box ul { margin: 6px 0 10px 18px; }
+.israel-relief-box .notice-item { margin-bottom: 4px; }
+.israel-relief-box .covered-list { background: #fff; border-radius: 4px; padding: 8px 12px; margin-top: 8px; font-size: 0.8rem; }
+.israel-green-msg {
+  display: none;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: var(--green-bg);
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius);
+  color: var(--green);
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+.israel-green-msg.visible { display: block; }
 
 /* Tabs */
 .tabs {
@@ -146,6 +223,14 @@ body {
 .checkbox-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); }
 .checkbox-row label { font-size: 0.82rem; color: var(--gray-700); margin-bottom: 0; }
 
+.checkbox-row-prominent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.checkbox-row-prominent input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--teal); }
+.checkbox-row-prominent label { font-size: 0.88rem; font-weight: 600; color: var(--gray-700); margin-bottom: 0; }
+
 /* Buttons */
 .btn {
   display: inline-flex;
@@ -182,6 +267,7 @@ body {
 .rc-red .rc-header { background: var(--red-bg); color: var(--red); }
 .rc-green .rc-header { background: var(--green-bg); color: var(--green); }
 .rc-orange .rc-header { background: var(--orange-bg); color: var(--orange); }
+.rc-teal .rc-header { background: var(--teal-bg); color: var(--teal); }
 
 .result-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 .result-table th, .result-table td { padding: 8px 16px; text-align: left; }
@@ -251,6 +337,7 @@ body {
   body { background: #fff; }
   .header { padding: 12px; }
   .tabs, .btn-row, .form-grid, .form-group, .checkbox-row { display: none !important; }
+  .global-settings { display: none !important; }
   .tab-content { display: block !important; }
   .results { display: block !important; }
   .results.hidden { display: none !important; }
@@ -283,6 +370,20 @@ body {
 
 /* Responsive table wrapper */
 .table-wrap { overflow-x: auto; }
+
+/* Effective date display in cards */
+.effective-dates {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 0.82rem;
+  color: var(--gray-700);
+}
+.effective-dates .ed-label { font-weight: 600; color: var(--blue); margin-bottom: 4px; }
+.effective-dates .ed-item { display: inline-block; margin-right: 16px; }
+.effective-dates .ed-relief { color: var(--teal); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -293,6 +394,66 @@ body {
 </div>
 
 <div class="container">
+
+  <!-- ===== GLOBAL SETTINGS ===== -->
+  <div class="global-settings">
+    <h3>Tax Year &amp; Filing Settings</h3>
+    <div class="gs-row">
+      <div class="form-group">
+        <label>Tax Year</label>
+        <select id="gs-year">
+          <option value="2025" selected>2025</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+          <option value="2022">2022</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Original Due Date</label>
+        <input type="date" id="gs-due" value="2025-04-15">
+      </div>
+    </div>
+
+    <div class="extension-row">
+      <div class="checkbox-row" style="margin-top:0">
+        <input type="checkbox" id="gs-extension">
+        <label for="gs-extension"><strong>Filed extension (Form 4868)</strong></label>
+      </div>
+      <div id="gs-extension-fields" class="extension-fields">
+        <div class="form-group">
+          <label>Extended Due Date <span class="tip">(typically Oct 15)</span></label>
+          <input type="date" id="gs-ext-due" value="2025-10-15">
+        </div>
+      </div>
+      <div class="extension-note" id="gs-extension-note" style="display:none;">
+        <strong>Note:</strong> An extension extends the <em>filing</em> deadline to Oct 15, but does <strong>not</strong> extend the <em>payment</em> deadline — tax is still due Apr 15. Interest and failure-to-pay penalties accrue from the original due date.
+      </div>
+    </div>
+
+    <div class="israel-relief-row">
+      <div class="checkbox-row-prominent">
+        <input type="checkbox" id="gs-israel">
+        <label for="gs-israel">🇮🇱 Taxpayer in Israel — IRS Terror Relief (Notice 2023-71 / 2024-34 / 2024-51)</label>
+      </div>
+      <div id="gs-israel-box" class="israel-relief-box">
+        <h4>IRS Terror Relief — Postponed Deadlines</h4>
+        <p>Three IRS notices provide relief for taxpayers affected by the October 7, 2023 terrorist attacks in Israel:</p>
+        <ul>
+          <li class="notice-item"><strong>Notice 2023-71</strong> (Oct 2023): Initial postponement — deadlines falling on or after Oct 7, 2023 postponed to Oct 7, 2024.</li>
+          <li class="notice-item"><strong>Notice 2024-34</strong> (Mar 2024): Extended the postponement period through Oct 7, 2024 (same end date, expanded scope).</li>
+          <li class="notice-item"><strong>Notice 2024-51</strong> (Jul 2024): Further extended <strong>all</strong> postponed deadlines to <strong>September 30, 2025</strong>.</li>
+        </ul>
+        <p><strong>Effect:</strong> If the original due date (or extended due date) falls between <strong>Oct 7, 2023</strong> and <strong>Sept 30, 2025</strong>, the effective due date for both filing and payment becomes <strong>Sept 30, 2025</strong>. No penalties or interest accrue until after that date.</p>
+        <div class="covered-list">
+          <strong>Covered deadlines:</strong> Filing returns, paying tax, estimated tax payments, FBAR/FATCA filing deadlines, and other time-sensitive acts.
+        </div>
+      </div>
+      <div id="gs-israel-green" class="israel-green-msg">
+        ✓ No penalties or interest — within Israel terror relief period (deadline extended to Sept 30, 2025)
+      </div>
+    </div>
+  </div>
+
   <div class="tabs" role="tablist">
     <button class="tab-btn active" data-tab="filing" role="tab">Late Filing &amp; Payment</button>
     <button class="tab-btn" data-tab="estimated" role="tab">Estimated Tax (2210)</button>
@@ -305,14 +466,11 @@ body {
     <div class="card">
       <h2>Late Filing &amp; Late Payment Penalties</h2>
       <p class="card-desc">Form 1040 — Failure-to-file and failure-to-pay penalty computation</p>
+      <div id="f1-effective" class="effective-dates"></div>
       <div class="form-grid">
         <div class="form-group">
           <label>Tax Due Amount ($)</label>
           <input type="number" id="f1-tax" min="0" step="0.01" placeholder="e.g. 5000">
-        </div>
-        <div class="form-group">
-          <label>Original Due Date <span class="tip">(usually Apr 15)</span></label>
-          <input type="date" id="f1-due" value="2025-04-15">
         </div>
         <div class="form-group">
           <label>Date Filed</label>
@@ -343,15 +501,8 @@ body {
     <div class="card">
       <h2>Underpayment of Estimated Tax</h2>
       <p class="card-desc">Form 2210 — Estimated tax penalty for individuals</p>
+      <div id="f2-effective" class="effective-dates"></div>
       <div class="form-grid">
-        <div class="form-group">
-          <label>Tax Year</label>
-          <select id="f2-year">
-            <option value="2025" selected>2025</option>
-            <option value="2024">2024</option>
-            <option value="2023">2023</option>
-          </select>
-        </div>
         <div class="form-group">
           <label>Total Tax Liability (current year)</label>
           <input type="number" id="f2-liability" min="0" step="0.01" placeholder="e.g. 30000">
@@ -364,7 +515,7 @@ body {
           <label>Withholding (W-2 / 1099)</label>
           <input type="number" id="f2-withholding" min="0" step="0.01" value="0">
         </div>
-        <div class="form-group full">
+        <div class="form-group">
           <div class="checkbox-row" style="margin-top:0">
             <input type="checkbox" id="f2-highagi">
             <label for="f2-highagi"><span class="has-tip" data-tip="If your AGI exceeds $150,000 ($75,000 MFS), the safe harbor for prior year tax is 110% instead of 100%.">AGI &gt; $150,000</span></label>
@@ -374,21 +525,21 @@ body {
       <div class="form-group full" style="margin-top:12px">
         <label style="font-size:.85rem;font-weight:600;color:var(--gray-700);margin-bottom:8px;">Estimated Tax Payments</label>
       </div>
-      <div class="quarter-grid">
+      <div class="quarter-grid" id="f2-quarters">
         <div class="quarter-box">
-          <div class="q-label">Q1 (Apr 15)</div>
+          <div class="q-label" id="f2-q1-label">Q1 (Apr 15)</div>
           <input type="number" id="f2-q1" min="0" step="0.01" value="0" placeholder="$0">
         </div>
         <div class="quarter-box">
-          <div class="q-label">Q2 (Jun 15)</div>
+          <div class="q-label" id="f2-q2-label">Q2 (Jun 15)</div>
           <input type="number" id="f2-q2" min="0" step="0.01" value="0" placeholder="$0">
         </div>
         <div class="quarter-box">
-          <div class="q-label">Q3 (Sep 15)</div>
+          <div class="q-label" id="f2-q3-label">Q3 (Sep 15)</div>
           <input type="number" id="f2-q3" min="0" step="0.01" value="0" placeholder="$0">
         </div>
         <div class="quarter-box">
-          <div class="q-label">Q4 (Jan 15)</div>
+          <div class="q-label" id="f2-q4-label">Q4 (Jan 15)</div>
           <input type="number" id="f2-q4" min="0" step="0.01" value="0" placeholder="$0">
         </div>
       </div>
@@ -404,14 +555,11 @@ body {
     <div class="card">
       <h2>Underpayment Interest on Balance Due</h2>
       <p class="card-desc">Daily compounding interest at the federal short-term rate + 3%</p>
+      <div id="f3-effective" class="effective-dates"></div>
       <div class="form-grid">
         <div class="form-group">
           <label>Balance Due ($)</label>
           <input type="number" id="f3-balance" min="0" step="0.01" placeholder="e.g. 10000">
-        </div>
-        <div class="form-group">
-          <label>Due Date</label>
-          <input type="date" id="f3-due" value="2025-04-15">
         </div>
         <div class="form-group">
           <label>Payment Date</label>
@@ -492,6 +640,10 @@ const IRS_RATES = {
 };
 const DEFAULT_RATE = 7;
 
+// Israel terror relief constants
+const ISRAEL_RELIEF_START = new Date('2023-10-07T00:00:00');
+const ISRAEL_RELIEF_END = new Date('2025-09-30T00:00:00');
+
 function getQuarterlyRate(date) {
   const y = date.getFullYear();
   const m = date.getMonth() + 1;
@@ -507,12 +659,15 @@ function fmt(n) {
   return n.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 }
 
+function fmtDate(d) {
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 function daysBetween(a, b) {
   return Math.round((b - a) / 86400000);
 }
 
 function monthsBetween(start, end) {
-  // Count full and partial months per IRS rules (each partial month counts as full month)
   if (end <= start) return 0;
   let months = 0;
   let cursor = new Date(start);
@@ -532,6 +687,179 @@ function parseNum(id) {
   return parseFloat(document.getElementById(id).value) || 0;
 }
 
+function dateToInput(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+// Check if a date falls within Israel relief window
+function isInReliefWindow(date) {
+  return date >= ISRAEL_RELIEF_START && date <= ISRAEL_RELIEF_END;
+}
+
+// ===== Global Settings Logic =====
+function getGlobalSettings() {
+  const year = parseInt(document.getElementById('gs-year').value);
+  const originalDue = parseDate('gs-due');
+  const hasExtension = document.getElementById('gs-extension').checked;
+  const extendedDue = hasExtension ? parseDate('gs-ext-due') : null;
+  const israelRelief = document.getElementById('gs-israel').checked;
+
+  // Determine effective filing due date
+  let filingDue = originalDue;
+  let paymentDue = originalDue;
+
+  if (hasExtension && extendedDue) {
+    filingDue = extendedDue; // Extension extends filing deadline
+    // Payment deadline stays at original due date
+  }
+
+  // Israel relief: if the due date falls in the relief window, extend to Sept 30, 2025
+  let israelAppliesFile = false;
+  let israelAppliesPay = false;
+  if (israelRelief) {
+    if (isInReliefWindow(filingDue)) {
+      filingDue = new Date('2025-09-30T00:00:00');
+      israelAppliesFile = true;
+    }
+    if (isInReliefWindow(paymentDue)) {
+      paymentDue = new Date('2025-09-30T00:00:00');
+      israelAppliesPay = true;
+    }
+  }
+
+  return {
+    year,
+    originalDue,
+    hasExtension,
+    extendedDue,
+    israelRelief,
+    filingDue,
+    paymentDue,
+    israelAppliesFile,
+    israelAppliesPay,
+  };
+}
+
+function updateGlobalUI() {
+  const year = parseInt(document.getElementById('gs-year').value);
+
+  // Update original due date
+  document.getElementById('gs-due').value = `${year}-04-15`;
+
+  // Update extended due date if extension is checked
+  const hasExtension = document.getElementById('gs-extension').checked;
+  if (hasExtension) {
+    document.getElementById('gs-ext-due').value = `${year}-10-15`;
+  }
+
+  updateExtensionUI();
+  updateIsraelUI();
+  updateEffectiveDateDisplays();
+}
+
+function updateExtensionUI() {
+  const checked = document.getElementById('gs-extension').checked;
+  const fields = document.getElementById('gs-extension-fields');
+  const note = document.getElementById('gs-extension-note');
+
+  if (checked) {
+    fields.classList.add('visible');
+    note.style.display = 'block';
+    // Auto-populate if empty or default
+    const year = parseInt(document.getElementById('gs-year').value);
+    const extInput = document.getElementById('gs-ext-due');
+    if (!extInput.value) {
+      extInput.value = `${year}-10-15`;
+    }
+  } else {
+    fields.classList.remove('visible');
+    note.style.display = 'none';
+  }
+
+  updateIsraelUI();
+  updateEffectiveDateDisplays();
+}
+
+function updateIsraelUI() {
+  const checked = document.getElementById('gs-israel').checked;
+  const box = document.getElementById('gs-israel-box');
+
+  if (checked) {
+    box.classList.add('visible');
+  } else {
+    box.classList.remove('visible');
+    document.getElementById('gs-israel-green').classList.remove('visible');
+  }
+
+  updateEffectiveDateDisplays();
+}
+
+function updateEffectiveDateDisplays() {
+  const gs = getGlobalSettings();
+
+  // Filing section
+  const f1el = document.getElementById('f1-effective');
+  let f1html = '<div class="ed-label">Effective Dates for This Calculation</div>';
+  f1html += `<span class="ed-item"><strong>Filing deadline:</strong> ${fmtDate(gs.filingDue)}`;
+  if (gs.israelAppliesFile) f1html += ' <span class="ed-relief">(Israel relief)</span>';
+  else if (gs.hasExtension) f1html += ' <span style="color:var(--orange)">(extension)</span>';
+  f1html += '</span>';
+  f1html += `<span class="ed-item"><strong>Payment deadline:</strong> ${fmtDate(gs.paymentDue)}`;
+  if (gs.israelAppliesPay) f1html += ' <span class="ed-relief">(Israel relief)</span>';
+  f1html += '</span>';
+  f1el.innerHTML = f1html;
+
+  // Balance section
+  const f3el = document.getElementById('f3-effective');
+  let f3html = '<div class="ed-label">Effective Dates for This Calculation</div>';
+  f3html += `<span class="ed-item"><strong>Payment deadline:</strong> ${fmtDate(gs.paymentDue)}`;
+  if (gs.israelAppliesPay) f3html += ' <span class="ed-relief">(Israel relief)</span>';
+  f3html += '</span>';
+  f3el.innerHTML = f3html;
+
+  // Estimated section
+  const f2el = document.getElementById('f2-effective');
+  if (gs.israelRelief) {
+    f2el.innerHTML = '<div class="ed-label">Israel Terror Relief Active</div>' +
+      '<span class="ed-item">Estimated tax deadlines within the relief window (Oct 7, 2023 – Sept 30, 2025) are postponed to <strong>Sept 30, 2025</strong>.</span>';
+  } else {
+    f2el.innerHTML = '<div class="ed-label">Tax Year ' + gs.year + '</div>' +
+      '<span class="ed-item">Standard estimated tax deadlines apply.</span>';
+  }
+
+  // Update quarter labels
+  const y = gs.year;
+  document.getElementById('f2-q1-label').textContent = `Q1 (Apr 15, ${y})`;
+  document.getElementById('f2-q2-label').textContent = `Q2 (Jun 15, ${y})`;
+  document.getElementById('f2-q3-label').textContent = `Q3 (Sep 15, ${y})`;
+  document.getElementById('f2-q4-label').textContent = `Q4 (Jan 15, ${y + 1})`;
+
+  // Hide the green msg by default
+  document.getElementById('gs-israel-green').classList.remove('visible');
+}
+
+// Event listeners for global settings
+document.getElementById('gs-year').addEventListener('change', updateGlobalUI);
+document.getElementById('gs-extension').addEventListener('change', function() {
+  if (this.checked) {
+    const year = parseInt(document.getElementById('gs-year').value);
+    document.getElementById('gs-ext-due').value = `${year}-10-15`;
+  }
+  updateExtensionUI();
+});
+document.getElementById('gs-ext-due').addEventListener('change', function() {
+  updateIsraelUI();
+  updateEffectiveDateDisplays();
+});
+document.getElementById('gs-israel').addEventListener('change', updateIsraelUI);
+document.getElementById('gs-due').addEventListener('change', function() {
+  updateIsraelUI();
+  updateEffectiveDateDisplays();
+});
+
 // ===== Tab Navigation =====
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -544,29 +872,42 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 // ===== SECTION 1: Late Filing & Payment =====
 function calcFiling() {
+  const gs = getGlobalSettings();
   const tax = parseNum('f1-tax');
-  const due = parseDate('f1-due');
   const filed = parseDate('f1-filed');
   const paid = parseDate('f1-paid');
   const installment = document.getElementById('f1-installment').checked;
   const notice = document.getElementById('f1-notice').checked;
   const el = document.getElementById('f1-results');
 
-  if (!tax || !due || !filed || !paid) {
+  if (!tax || !filed || !paid) {
     el.innerHTML = '<p style="color:var(--red);margin-top:12px;">Please fill in all fields.</p>';
     el.classList.remove('hidden');
     return;
   }
 
-  // Months late for filing
-  const fileMonths = monthsBetween(due, filed);
-  // Months late for paying
-  const payMonths = monthsBetween(due, paid);
+  const filingDue = gs.filingDue;
+  const paymentDue = gs.paymentDue;
+
+  // Check if Israel relief covers everything
+  if (gs.israelRelief && filed <= new Date('2025-09-30T00:00:00') && paid <= new Date('2025-09-30T00:00:00') &&
+      gs.israelAppliesFile && gs.israelAppliesPay) {
+    el.innerHTML = '';
+    document.getElementById('gs-israel-green').classList.add('visible');
+    el.classList.add('hidden');
+    return;
+  }
+  document.getElementById('gs-israel-green').classList.remove('visible');
+
+  // Months late for filing (from filing due date)
+  const fileMonths = monthsBetween(filingDue, filed);
+  // Months late for paying (from payment due date)
+  const payMonths = monthsBetween(paymentDue, paid);
 
   // Failure-to-pay rate
-  let ftpRatePerMonth = 0.005; // 0.5%
-  if (notice) ftpRatePerMonth = 0.01;  // 1% after notice
-  if (installment) ftpRatePerMonth = 0.0025; // 0.25% with installment agreement
+  let ftpRatePerMonth = 0.005;
+  if (notice) ftpRatePerMonth = 0.01;
+  if (installment) ftpRatePerMonth = 0.0025;
 
   // Failure-to-pay penalty
   let ftpPenalty = 0;
@@ -577,38 +918,32 @@ function calcFiling() {
   // Failure-to-file penalty
   let ftfPenalty = 0;
   let ftfMonths = fileMonths;
-  // FTF is 5% per month, but reduced by FTP when both run concurrently
   if (ftfMonths > 0) {
-    // Months where both FTF and FTP overlap
     const overlapMonths = Math.min(ftfMonths, payMonths);
-    const ftfOnlyMonths = ftfMonths - overlapMonths;
-
-    // During overlap: FTF net rate = 5% - FTP rate per month
-    const netFtfRate = 0.05 - ftpRatePerMonth;
-    let ftfRate = overlapMonths * netFtfRate + ftfOnlyMonths * 0.05;
-    ftfRate = Math.min(ftfRate, 0.25 - (installment ? 0 : 0)); // FTF max 25% total (but this is the gross, we need net)
-
-    // Actually: max gross FTF is 25%. The reduction is applied after.
-    // IRS rule: gross FTF = min(months * 5%, 25%). Then net FTF = gross FTF - FTP during overlap.
     let grossFtf = Math.min(ftfMonths * 0.05, 0.25) * tax;
     let ftpDuringOverlap = Math.min(overlapMonths * ftpRatePerMonth, 0.25) * tax;
-    // But we can't reduce more than the FTF itself
     ftfPenalty = Math.max(grossFtf - ftpDuringOverlap, 0);
 
-    // Minimum penalty: if >60 days late, min penalty = lesser of $510 or 100% of tax
-    const daysLate = daysBetween(due, filed);
+    const daysLate = daysBetween(filingDue, filed);
     if (daysLate > 60) {
       const minPenalty = Math.min(510, tax);
       ftfPenalty = Math.max(ftfPenalty, minPenalty);
     }
   }
 
-  // Recalculate FTP independently for display (not reduced)
   let ftpDisplay = ftpPenalty;
-
   const total = ftfPenalty + ftpDisplay;
 
   let html = '';
+
+  // Show effective dates used
+  html += `<div class="result-card rc-teal">
+    <div class="rc-header">Effective Dates Used</div>
+    <table class="result-table"><tbody>
+      <tr><td>Filing deadline</td><td class="text-right">${fmtDate(filingDue)}${gs.israelAppliesFile ? ' (Israel relief)' : gs.hasExtension ? ' (extension)' : ''}</td></tr>
+      <tr><td>Payment deadline</td><td class="text-right">${fmtDate(paymentDue)}${gs.israelAppliesPay ? ' (Israel relief)' : ''}</td></tr>
+    </tbody></table>
+  </div>`;
 
   // FTF detail
   html += `<div class="result-card rc-red">
@@ -617,7 +952,7 @@ function calcFiling() {
       <tr><td>Months late (filing)</td><td class="text-right">${fileMonths}</td></tr>
       <tr><td>Gross rate</td><td class="text-right">${Math.min(fileMonths * 5, 25)}% (5% &times; ${fileMonths}, max 25%)</td></tr>
       <tr><td>Less: concurrent FTP reduction</td><td class="text-right">&minus;${(Math.min(Math.min(fileMonths, payMonths) * ftpRatePerMonth * 100, 25)).toFixed(2)}%</td></tr>
-      ${fileMonths > 0 && daysBetween(due, filed) > 60 ? `<tr><td>Minimum penalty (&gt;60 days late)</td><td class="text-right">${fmt(Math.min(510, tax))}</td></tr>` : ''}
+      ${fileMonths > 0 && daysBetween(filingDue, filed) > 60 ? `<tr><td>Minimum penalty (&gt;60 days late)</td><td class="text-right">${fmt(Math.min(510, tax))}</td></tr>` : ''}
       <tr class="total-row"><td>Failure-to-File Penalty</td><td class="text-right">${fmt(ftfPenalty)}</td></tr>
     </tbody></table>
   </div>`;
@@ -648,7 +983,8 @@ function calcFiling() {
 
 // ===== SECTION 2: Estimated Tax =====
 function calcEstimated() {
-  const year = parseInt(document.getElementById('f2-year').value);
+  const gs = getGlobalSettings();
+  const year = gs.year;
   const liability = parseNum('f2-liability');
   const prior = parseNum('f2-prior');
   const withholding = parseNum('f2-withholding');
@@ -665,27 +1001,44 @@ function calcEstimated() {
     return;
   }
 
-  // Required annual payment
   const safeHarborPrior = highAgi ? prior * 1.10 : prior;
   const safeHarborCurrent = liability * 0.90;
   const requiredAnnual = prior > 0 ? Math.min(safeHarborCurrent, safeHarborPrior) : safeHarborCurrent;
   const requiredQuarterly = requiredAnnual / 4;
 
-  // Withholding allocated equally across quarters
   const whPerQ = withholding / 4;
 
-  // Quarter due dates and deadlines (payment due -> next quarter start for interest calc)
-  const qDates = [
+  // Quarter due dates
+  let qDates = [
     { label: 'Q1', due: new Date(year, 3, 15), end: new Date(year, 5, 15) },
     { label: 'Q2', due: new Date(year, 5, 15), end: new Date(year, 8, 15) },
     { label: 'Q3', due: new Date(year, 8, 15), end: new Date(year + 1, 0, 15) },
     { label: 'Q4', due: new Date(year + 1, 0, 15), end: new Date(year + 1, 3, 15) },
   ];
+
+  // If Israel relief, adjust due dates that fall within the relief window
+  if (gs.israelRelief) {
+    const reliefDate = new Date('2025-09-30T00:00:00');
+    for (let i = 0; i < qDates.length; i++) {
+      if (isInReliefWindow(qDates[i].due)) {
+        qDates[i].originalDue = new Date(qDates[i].due);
+        qDates[i].due = reliefDate;
+        qDates[i].israelPostponed = true;
+        // Adjust end date: interest accrues from postponed due to the later of original end or postponed due + original period
+        // For simplicity: if postponed, interest runs from relief date to the filing deadline (Apr 15 of next year)
+        const filingDeadline = new Date(year + 1, 3, 15);
+        if (qDates[i].end < reliefDate) {
+          qDates[i].end = filingDeadline;
+        }
+      }
+    }
+  }
+
   const payments = [q1pay, q2pay, q3pay, q4pay];
 
   let totalPenalty = 0;
   let rows = '';
-  let carryover = 0; // overpayment carried to next quarter
+  let carryover = 0;
 
   for (let i = 0; i < 4; i++) {
     const totalPaid = payments[i] + whPerQ + carryover;
@@ -694,22 +1047,26 @@ function calcEstimated() {
 
     let interest = 0;
     if (underpayment > 0) {
-      // Calculate interest from due date to end date using daily compounding
       const startDate = qDates[i].due;
       const endDate = qDates[i].end;
-      let balance = underpayment;
-      let d = new Date(startDate);
-      while (d < endDate) {
-        const dailyRate = getDailyRate(d);
-        balance += balance * dailyRate;
-        d.setDate(d.getDate() + 1);
+      if (endDate > startDate) {
+        let balance = underpayment;
+        let d = new Date(startDate);
+        while (d < endDate) {
+          const dailyRate = getDailyRate(d);
+          balance += balance * dailyRate;
+          d.setDate(d.getDate() + 1);
+        }
+        interest = balance - underpayment;
       }
-      interest = balance - underpayment;
     }
 
     totalPenalty += interest;
+    const dueDateLabel = qDates[i].israelPostponed
+      ? `${fmtDate(qDates[i].originalDue)} → <span class="ed-relief">Sept 30, 2025</span>`
+      : fmtDate(qDates[i].due);
     rows += `<tr>
-      <td>${qDates[i].label}</td>
+      <td>${qDates[i].label}<br><span style="font-size:.75rem;color:var(--gray-400)">Due: ${dueDateLabel}</span></td>
       <td class="text-right">${fmt(requiredQuarterly)}</td>
       <td class="text-right">${fmt(payments[i] + whPerQ + (i === 0 ? 0 : Math.max(payments[i-1] + whPerQ - requiredQuarterly, 0)))}</td>
       <td class="text-right">${fmt(underpayment)}</td>
@@ -719,7 +1076,7 @@ function calcEstimated() {
   }
 
   let html = `<div class="result-card rc-blue">
-    <div class="rc-header">Estimated Tax Underpayment Calculation</div>
+    <div class="rc-header">Estimated Tax Underpayment Calculation — Tax Year ${year}</div>
     <table class="result-table">
       <thead><tr>
         <th>Quarter</th><th class="text-right">Required</th><th class="text-right">Paid + W/H</th>
@@ -747,16 +1104,26 @@ function calcEstimated() {
 
 // ===== SECTION 3: Balance Due Interest =====
 function calcBalance() {
+  const gs = getGlobalSettings();
   const balance = parseNum('f3-balance');
-  const due = parseDate('f3-due');
+  const due = gs.paymentDue; // Use effective payment due date
   const paid = parseDate('f3-paid');
   const el = document.getElementById('f3-results');
 
-  if (!balance || !due || !paid) {
+  if (!balance || !paid) {
     el.innerHTML = '<p style="color:var(--red);margin-top:12px;">Please fill in all fields.</p>';
     el.classList.remove('hidden');
     return;
   }
+
+  // Check Israel relief
+  if (gs.israelRelief && gs.israelAppliesPay && paid <= new Date('2025-09-30T00:00:00')) {
+    el.innerHTML = '';
+    document.getElementById('gs-israel-green').classList.add('visible');
+    el.classList.add('hidden');
+    return;
+  }
+  document.getElementById('gs-israel-green').classList.remove('visible');
 
   if (paid <= due) {
     el.innerHTML = '<p style="color:var(--green);margin-top:12px;">No interest — payment was on or before the due date.</p>';
@@ -766,7 +1133,6 @@ function calcBalance() {
 
   const totalDays = daysBetween(due, paid);
 
-  // Daily compounding, track by quarter periods for display
   let principal = balance;
   let totalInterest = 0;
   let rows = '';
@@ -779,7 +1145,6 @@ function calcBalance() {
   while (d < paid) {
     const currentRate = getQuarterlyRate(d);
     if (currentRate !== periodRate && periodDays > 0) {
-      // Output period row
       rows += `<tr>
         <td>${periodStart.toLocaleDateString('en-US')} – ${new Date(d - 86400000).toLocaleDateString('en-US')}</td>
         <td class="text-right">${periodDays}</td>
@@ -801,7 +1166,6 @@ function calcBalance() {
     d.setDate(d.getDate() + 1);
   }
 
-  // Final period
   if (periodDays > 0) {
     rows += `<tr>
       <td>${periodStart.toLocaleDateString('en-US')} – ${new Date(paid - 86400000).toLocaleDateString('en-US')}</td>
@@ -812,7 +1176,7 @@ function calcBalance() {
   }
 
   let html = `<div class="result-card rc-blue">
-    <div class="rc-header">Interest Accrual — Daily Compounding</div>
+    <div class="rc-header">Interest Accrual — Daily Compounding (from ${fmtDate(due)})</div>
     <table class="result-table">
       <thead><tr>
         <th>Period</th><th class="text-right">Days</th><th class="text-right">Annual Rate</th><th class="text-right">Interest</th>
@@ -837,6 +1201,9 @@ function calcBalance() {
   el.innerHTML = html;
   el.classList.remove('hidden');
 }
+
+// Initialize effective date displays on load
+updateEffectiveDateDisplays();
 </script>
 </body>
 </html>
