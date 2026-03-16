@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>US Tax Residency & Filing Status Wizard — PSA Tools</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue: #1a5276;
+  --blue-light: #2980b9;
+  --blue-pale: #d4e6f1;
+  --blue-bg: #eaf2f8;
+  --gray-bg: #f8f9fa;
+  --gray-border: #dee2e6;
+  --text: #2c3e50;
+  --text-light: #5d6d7e;
+  --green: #27ae60;
+  --green-bg: #eafaf1;
+  --orange: #e67e22;
+  --orange-bg: #fef5e7;
+  --red: #c0392b;
+  --red-bg: #fdedec;
+  --yellow-bg: #fef9e7;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--gray-bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+header {
+  background: var(--blue);
+  color: #fff;
+  padding: 1.25rem 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+header .top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 860px;
+  margin: 0 auto;
+}
+header a.home-link {
+  color: var(--blue-pale);
+  text-decoration: none;
+  font-size: .9rem;
+  transition: color .2s;
+}
+header a.home-link:hover { color: #fff; }
+header h1 { font-size: 1.45rem; font-weight: 700; margin-top: .35rem; max-width: 860px; margin-left: auto; margin-right: auto; }
+header p.subtitle { font-size: .85rem; opacity: .85; max-width: 860px; margin: .15rem auto 0; }
+
+.container {
+  max-width: 860px;
+  margin: 2rem auto;
+  padding: 0 1.25rem 3rem;
+}
+
+/* Progress bar */
+.progress-wrap {
+  background: var(--gray-border);
+  border-radius: 6px;
+  height: 8px;
+  margin-bottom: 1.75rem;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: var(--blue-light);
+  border-radius: 6px;
+  transition: width .4s ease;
+}
+
+/* Card */
+.card {
+  background: #fff;
+  border: 1px solid var(--gray-border);
+  border-radius: 10px;
+  padding: 2rem 2.25rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+.card h2 {
+  font-size: 1.2rem;
+  color: var(--blue);
+  margin-bottom: .25rem;
+}
+.card .step-label {
+  font-size: .8rem;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text-light);
+  margin-bottom: .75rem;
+}
+.card p, .card li { font-size: .95rem; }
+.card p + p { margin-top: .6rem; }
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: .6rem 1.4rem;
+  border: none;
+  border-radius: 6px;
+  font-size: .95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+  text-align: center;
+}
+.btn:active { transform: scale(.97); }
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: var(--blue-light); }
+.btn-secondary { background: var(--blue-pale); color: var(--blue); }
+.btn-secondary:hover { background: #b8d4e8; }
+.btn-outline { background: transparent; border: 2px solid var(--blue); color: var(--blue); }
+.btn-outline:hover { background: var(--blue); color: #fff; }
+.btn-back { background: transparent; color: var(--text-light); font-weight: 500; padding-left: 0; }
+.btn-back:hover { color: var(--text); }
+
+.btn-group { display: flex; gap: .75rem; margin-top: 1.5rem; flex-wrap: wrap; }
+.btn-group .btn { min-width: 120px; }
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1.75rem; }
+
+/* Choice buttons */
+.choices { display: flex; flex-direction: column; gap: .6rem; margin-top: 1.25rem; }
+.choice-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: .85rem 1.25rem;
+  background: var(--blue-bg);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-size: .95rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+.choice-btn:hover { border-color: var(--blue-light); background: var(--blue-pale); }
+
+/* Inputs */
+.form-group { margin-top: 1rem; }
+.form-group label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: .3rem; }
+.form-group input[type="number"],
+.form-group select {
+  width: 100%;
+  max-width: 320px;
+  padding: .55rem .75rem;
+  border: 1px solid var(--gray-border);
+  border-radius: 6px;
+  font-size: .95rem;
+  color: var(--text);
+}
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--blue-light); box-shadow: 0 0 0 3px rgba(41,128,185,.15); }
+.form-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+.form-row .form-group { flex: 1; min-width: 140px; }
+
+/* Info boxes */
+.info-box {
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-top: 1rem;
+  font-size: .9rem;
+  line-height: 1.55;
+}
+.info-box.blue { background: var(--blue-bg); border-left: 4px solid var(--blue-light); }
+.info-box.green { background: var(--green-bg); border-left: 4px solid var(--green); }
+.info-box.orange { background: var(--orange-bg); border-left: 4px solid var(--orange); }
+.info-box.red { background: var(--red-bg); border-left: 4px solid var(--red); }
+.info-box.yellow { background: var(--yellow-bg); border-left: 4px solid #f1c40f; }
+.info-box strong { display: block; margin-bottom: .25rem; }
+
+/* Result */
+.result-section { margin-top: 1.25rem; }
+.result-section h3 { font-size: 1rem; color: var(--blue); margin-bottom: .4rem; border-bottom: 1px solid var(--gray-border); padding-bottom: .3rem; }
+.result-section ul { list-style: disc; padding-left: 1.25rem; margin-top: .3rem; }
+.result-section li { margin-bottom: .25rem; font-size: .9rem; }
+.result-section + .result-section { margin-top: 1.25rem; }
+
+.tag {
+  display: inline-block;
+  padding: .2rem .7rem;
+  border-radius: 4px;
+  font-size: .8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+.tag-green { background: var(--green-bg); color: var(--green); }
+.tag-orange { background: var(--orange-bg); color: var(--orange); }
+.tag-red { background: var(--red-bg); color: var(--red); }
+.tag-blue { background: var(--blue-bg); color: var(--blue); }
+
+/* Comparison table */
+.cmp-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: .88rem; }
+.cmp-table th, .cmp-table td { padding: .6rem .75rem; border: 1px solid var(--gray-border); text-align: left; }
+.cmp-table th { background: var(--blue); color: #fff; font-weight: 600; }
+.cmp-table tr:nth-child(even) td { background: var(--gray-bg); }
+
+/* SPT math */
+.spt-math {
+  background: var(--gray-bg);
+  border: 1px solid var(--gray-border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-top: 1rem;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: .88rem;
+  line-height: 1.8;
+}
+.spt-math .line { display: flex; justify-content: space-between; }
+.spt-math .total { border-top: 2px solid var(--text); padding-top: .4rem; margin-top: .4rem; font-weight: 700; }
+.spt-pass { color: var(--green); font-weight: 700; }
+.spt-fail { color: var(--red); font-weight: 700; }
+
+/* Footer */
+.disclaimer {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem;
+  font-size: .78rem;
+  color: var(--text-light);
+  border-top: 1px solid var(--gray-border);
+  line-height: 1.55;
+}
+
+/* Hidden */
+.hidden { display: none !important; }
+
+/* Print */
+@media print {
+  header { box-shadow: none; }
+  .btn, .progress-wrap, .nav-row, .btn-group, .home-link { display: none !important; }
+  .card { box-shadow: none; border: 1px solid #ccc; }
+  body { background: #fff; }
+  .container { margin: .5rem auto; }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  header { padding: 1rem; }
+  header h1 { font-size: 1.15rem; }
+  .card { padding: 1.25rem 1rem; }
+  .btn-group { flex-direction: column; }
+  .btn-group .btn { min-width: unset; }
+  .form-row { flex-direction: column; gap: .5rem; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="top-row">
+    <a href="index.html" class="home-link">← All Tools</a>
+    <span style="font-size:.75rem;opacity:.7">PSA Internal</span>
+  </div>
+  <h1>US Tax Residency &amp; Filing Status Wizard</h1>
+  <p class="subtitle">Philip Stein &amp; Associates — Internal Tool</p>
+</header>
+
+<div class="container">
+  <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+  <div class="card" id="wizard"></div>
+</div>
+
+<div class="disclaimer">
+  <strong>Disclaimer:</strong> This tool is for internal guidance only and does not constitute tax or legal advice. Tax residency determinations involve complex facts-and-circumstances analysis. Always consult with a qualified tax professional before making filing decisions. Treaty positions in particular require careful analysis and proper disclosure. Immigration consequences of treaty elections should be reviewed with an immigration attorney. &copy; Philip Stein &amp; Associates.
+</div>
+
+<script>
+(function() {
+  "use strict";
+
+  const currentYear = new Date().getFullYear() - 1; // tax year = prior year
+
+  /* ── State ── */
+  const state = {
+    step: 'q1',
+    history: [],
+    // answers
+    citizen: null,
+    greenCard: null,
+    greenCardFullYear: null,
+    usPresence: null,
+    daysCY: 0, daysPY1: 0, daysPY2: 0,
+    sptMet: false,
+    sptTotal: 0,
+    firstYearSPT: null,
+    dualStatusFlagged: false,
+    usSourceIncome: null,
+    // treaty
+    treatyCountry: null,
+    treatyHome: null,
+    treatyVitalInterests: null,
+    treatyHabitualAbode: null,
+    treatyCitizenship: null,
+    treatyResult: null, // 'us' or 'other'
+    // computed
+    filingResult: null,
+  };
+
+  const el = document.getElementById('wizard');
+  const bar = document.getElementById('progressBar');
+
+  const progressMap = {
+    q1: 5, q2: 15, q2b: 20, q3: 30, q4: 40, q4result: 50,
+    q5: 55, q5b: 60, q6: 50, qt1: 65, qt2: 75, qt3: 85,
+    relocation: 90, result: 100
+  };
+
+  function setProgress(step) {
+    bar.style.width = (progressMap[step] || 0) + '%';
+  }
+
+  function go(step) {
+    state.history.push(state.step);
+    state.step = step;
+    render();
+  }
+
+  function goBack() {
+    if (state.history.length) {
+      state.step = state.history.pop();
+      render();
+    }
+  }
+
+  function render() {
+    setProgress(state.step);
+    const fn = steps[state.step];
+    if (fn) fn(); else steps.result();
+  }
+
+  function backBtn() {
+    return state.history.length ? `<button class="btn btn-back" onclick="wizBack()">← Back</button>` : '<span></span>';
+  }
+
+  function startOver() {
+    Object.assign(state, {
+      step:'q1', history:[], citizen:null, greenCard:null, greenCardFullYear:null,
+      usPresence:null, daysCY:0, daysPY1:0, daysPY2:0, sptMet:false, sptTotal:0,
+      firstYearSPT:null, dualStatusFlagged:false, usSourceIncome:null,
+      treatyCountry:null, treatyHome:null, treatyVitalInterests:null,
+      treatyHabitualAbode:null, treatyCitizenship:null, treatyResult:null, filingResult:null
+    });
+    render();
+  }
+  window.wizBack = goBack;
+  window.wizStart = startOver;
+
+  /* ── Steps ── */
+  const steps = {};
+
+  // Q1
+  steps.q1 = () => {
+    el.innerHTML = `
+      <div class="step-label">Step 1</div>
+      <h2>Are you a US citizen?</h2>
+      <p>US citizens are subject to tax on worldwide income regardless of where they live.</p>
+      <div class="choices">
+        <button class="choice-btn" id="q1y">Yes — I am a US citizen</button>
+        <button class="choice-btn" id="q1n">No — I am not a US citizen</button>
+      </div>
+      <div class="nav-row">${backBtn()}<span></span></div>`;
+    document.getElementById('q1y').onclick = () => { state.citizen = true; state.filingResult = 'citizen'; go('result'); };
+    document.getElementById('q1n').onclick = () => { state.citizen = false; go('q2'); };
+  };
+
+  // Q2
+  steps.q2 = () => {
+    el.innerHTML = `
+      <div class="step-label">Step 2</div>
+      <h2>Did you hold a US green card at any time during ${currentYear}?</h2>
+      <p>A green card (lawful permanent resident status) generally makes you a US resident for tax purposes under the Green Card Test.</p>
+      <div class="choices">
+        <button class="choice-btn" id="q2y">Yes — I held a green card</button>
+        <button class="choice-btn" id="q2n">No — I did not hold a green card</button>
+      </div>
+      <div class="nav-row">${backBtn()}<span></span></div>`;
+    document.getElementById('q2y').onclick = () => { state.greenCard = true; go('q2b'); };
+    document.getElementById('q2n').onclick = () => { state.greenCard = false; go('q3'); };
+  };
+
+  // Q2b
+  steps.q2b = () => {
+    el.innerHTML = `
+      <div class="step-label">Step 2b</div>
+      <h2>Did you hold the green card for the entire tax year (${currentYear})?</h2>
+      <div class="choices">
+        <button class="choice-btn" id="q2by">Yes — full year</button>
+        <button class="choice-btn" id="q2bn">No — only part of the year</button>
+      </div>
+      <div class="nav-row">${backBtn()}<span></span></div>`;
+    document.getElementById('q2by').onclick = () => {
+      state.greenCardFullYear = true;
+      go('qt1'); // check treaty tie-breaker
+    };
+    document.getElementById('q2bn').onclick = () => {
+      state.greenCardFullYear = false;
+      state.dualStatusFlagged = true;
+      go('q3');
+    };
+  };
+
+  // Q3
+  steps.q3 = () => {
+    el.innerHTML = `
+      <div class="step-label">Step 3 — Substantial Presence Test</div>
+      <h2>Were you physically present in the US during ${currentYear}?</h2>
+      <div class="choices">
+        <button class="choice-btn" id="q3y">Yes</button>
+        <button class="choice-btn" id="q3n">No — I was not present in the US at all</button>
+      </div>
+      <div class="nav-row">${backBtn()}<span></span></div>`;
+    document.getElementById('q3y').onclick = () => { state.usPresence = true; go('q4'); };
+    document.getElementById('q3n').onclick = () => { state.usPresence = false; go('q6'); };
+  };
+
+  // Q4 — Days input
+  steps.q4 = () => {
+    el.innerHTML = `
+      <div class="step-label">Step 4 — Days of Physical Presence</div>
+      <h2>Enter your days of physical presence in the US</h2>
+      <p>Count each day you were physically present, even partial days. Do not count days as an exempt individual (certain students, teachers, diplomats) or days you could not leave due to a medical condition.</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>${currentYear} (current tax year)</label>
+          <input type="number" id="dCY" min="0" max="366" value="${state.daysCY||''}">
+        </div>
+        <div class="form-group">
+          <label>${currentYear-1} (prior year)</label>
+          <input type="number" id="dPY1" min="0" max="366" value="${state.daysPY1||''}">
+        </div>
+        <div class="form-group">
+          <label>${currentYear-2} (two years prior)</label>
+          <input type="number" id="dPY2" min="0" max="366" value="${state.daysPY2||''}">
+        </div>
+      </div>
+      <div class="nav-row">
+        ${backBtn()}
+        <button class="btn btn-primary" id="q4go">Calculate SPT →</button>
+      </div>`;
+    document.getElementById('q4go').onclick = () => {
+      state.daysCY = parseInt(document.getElementById('dCY').value) || 0;
+      state.daysPY1 = parseInt(document.getElementById('dPY1').value) || 0;
+      state.daysPY2 = parseInt(document.getElementById('dPY2').value) || 0;
+      state.sptTotal = state.daysCY + (state.daysPY1 / 3) + (state.daysPY2 / 6);
+      state.sptMet = state.daysCY >= 31 && state.sptTotal >= 183;
+      go('q4result');
+    };
+  };
+
+  // Q4 result
+  steps.q4result = () => {
+    const cy = state.daysCY, py1 = state.daysPY1, py2 = state.daysPY2;
+    const t1 = cy, t2 = py1/3, t3 = py2/6;
+    const total = t1 + t2 + t3;
+    const met = state.sptMet;
+    const cls = met ? 'spt-pass' : 'spt-fail';
+    const label = met ? 'SPT MET ✓' : 'SPT NOT MET ✗';
+
+    let thirtyOneLine = '';
+    if (cy < 31) {
+      thirtyOneLine = `<div class="info-box orange" style="margin-top:.75rem"><strong>31-Day Minimum Not Met</strong>You were present for only ${cy} days in ${currentYear}. The SPT requires at least 31 days in the current year.</div>`;
+    }
+
+    el.innerHTML = `
+      <div class="step-label">Substantial Presence Test — Result</div>
+      <h2>SPT Calculation for ${currentYear}</h2>
+      <div class="spt-math">
+        <div class="line"><span>${currentYear}: ${cy} days × 1</span><span>= ${t1.toFixed(0)}</span></div>
+        <div class="line"><span>${currentYear-1}: ${py1} days × 1/3</span><span>= ${t2.toFixed(2)}</span></div>
+        <div class="line"><span>${currentYear-2}: ${py2} days × 1/6</span><span>= ${t3.toFixed(2)}</span></div>
+        <div class="line total"><span>Total</span><span class="${cls}">${total.toFixed(2)} — ${label}</span></div>
+      </div>
+      ${thirtyOneLine}
+      <div class="info-box ${met?'green':'blue'}">
+        ${met
+          ? '<strong>The Substantial Presence Test is met.</strong>You are treated as a US resident alien for tax purposes under the SPT.'
+          : '<strong>The Substantial Presence Test is not met.</strong>Based on the days entered, you do not meet the SPT threshold of 183 days (with the weighted formula) and at least 31 days in the current year.'}
+      </div>
+      <div class="nav-row">
+        ${backBtn()}
+        <button class="btn btn-primary" id="q4next">${met ? 'Continue →' : 'Continue →'}</button>
+      </div>`;
+    document.getElementById('q4next').onclick = () => {
+      if (met) go('q5');
+      else go('q6');
+    };
+  };
+
+  // Q5 — first year SPT?
+  steps.q5 = () => {
+    el.innerHTML = `
+      <div class="step-label">Step 5 — Residency Start Date</div>
+      <h2>Is ${currentYear} the first year you met the Substantial Presence Test?</h2>
+      <p>If you also met the SPT in ${currentYear-1}, you are considered a full-year resident. If this is your first year meeting it, your residency starts on your first day of presence.</p>
+      <div class="choices">
+        <button class="choice-btn" id="q5y">Yes — this is my first year meeting the SPT</button>
+        <button class="choice-btn" id="q5n">No — I also met the SPT in prior years</button>
+      </div>
+      <div class="nav-row">${backBtn()}<span></span></div>`;
+    document.getElementById('q5y').onclick = () => {
+      state.firstYearSPT = true;
+      state.dualStatusFlagged = true;
+      go('q5b');
+    };
+    document.getElementById('q5n').onclick = () => {
+      state.firstYearSPT = false;
+      // full year resident, check treaty
+      go('qt1');
+    };
+  };
+
+  // Q5b — dual status vs first-year election
+  steps.q5b = () => {
+    el.innerHTML = `
+      <div class="step-label">Step 5b — Dual-Status vs. First-Year Election</div>
+      <h2>Filing Options for Your First Year</h2>
+      <p>Since this is your first year meeting the SPT, you have two main options:</p>
+      <table class="cmp-table">
+        <thead><tr><th></th><th>Dual-Status Return</th><th>First-Year Election</th></tr></thead>
+        <tbody>
+          <tr><td><strong>How it works</strong></td><td>File as NRA for the period before your first day of US presence, and as RA for the rest of the year</td><td>Elect to be treated as a resident for the entire year (must meet SPT the following year)</td></tr>
+          <tr><td><strong>Form</strong></td><td>1040 with 1040-NR statement (or vice versa)</td><td>Form 1040 for the full year</td></tr>
+          <tr><td><strong>Standard deduction</strong></td><td>Not available</td><td>Available</td></tr>
+          <tr><td><strong>Filing jointly</strong></td><td>Not allowed</td><td>Allowed (if married)</td></tr>
+          <tr><td><strong>Worldwide income</strong></td><td>Only for RA portion; US-source only for NRA portion</td><td>Worldwide income for full year</td></tr>
+          <tr><td><strong>Best for</strong></td><td>Those with significant foreign income earned before arrival</td><td>Those who want simplicity and standard deduction / joint filing</td></tr>
+        </tbody>
+      </table>
+      <div class="info-box blue">
+        <strong>§6013(g) Election</strong>
+        If married to a US citizen or resident, you may also elect under IRC §6013(g) to be treated as a resident for the full year and file jointly — even without the First-Year Election.
+      </div>
+      <div class="nav-row">
+        ${backBtn()}
+        <button class="btn btn-primary" id="q5bnext">Check Treaty Tie-Breaker →</button>
+      </div>`;
+    document.getElementById('q5bnext').onclick = () => go('qt1');
+  };
+
+  // Q6 — NRA / no presence
+  steps.q6 = () => {
+    el.innerHTML = `
+      <div class="step-label">Step 6</div>
+      <h2>US-Source Income</h2>
+      <p>You did not meet the Substantial Presence Test${state.usPresence===false?' (no US presence)':''}. However, you may still have a US filing obligation if you received US-source income.</p>
+      <p>Did you have any US-source income in ${currentYear}? (wages, rental income, investment income, business income, etc.)</p>
+      <div class="choices">
+        <button class="choice-btn" id="q6y">Yes — I had US-source income</button>
+        <button class="choice-btn" id="q6n">No — I had no US-source income</button>
+      </div>
+      <div class="nav-row">${backBtn()}<span></span></div>`;
+    document.getElementById('q6y').onclick = () => {
+      state.usSourceIncome = true;
+      state.filingResult = 'nra';
+      if (state.dualStatusFlagged) {
+        state.filingResult = 'dual';
+        go('relocation');
+      } else {
+        go('result');
+      }
+    };
+    document.getElementById('q6n').onclick = () => {
+      state.usSourceIncome = false;
+      state.filingResult = 'none';
+      if (state.dualStatusFlagged) {
+        state.filingResult = 'dual';
+        go('relocation');
+      } else {
+        go('result');
+      }
+    };
+  };
+
+  /* ── Treaty Tie-Breaker ── */
+  const treatyCountries = [
+    'Israel','Canada','United Kingdom','Germany','France','India','China','Japan',
+    'Australia','South Korea','Mexico','Netherlands','Switzerland','Ireland','Italy',
+    'Spain','Sweden','South Africa','Brazil','Russia'
+  ];
+
+  steps.qt1 = () => {
+    const opts = treatyCountries.map(c => `<option value="${c}">${c}</option>`).join('');
+    el.innerHTML = `
+      <div class="step-label">Treaty Tie-Breaker — Step 1</div>
+      <h2>Treaty Tie-Breaker Analysis</h2>
+      <p>Even though you qualify as a US resident (via green card or SPT), you may be able to claim treaty benefits as a resident of another country under a tax treaty's tie-breaker provisions.</p>
+      <p>Do you have a connection to a country that has a tax treaty with the US?</p>
+      <div class="form-group">
+        <label>Select country</label>
+        <select id="treatySelect">
+          <option value="">— Select —</option>
+          ${opts}
+          <option value="other_treaty">Other country with treaty</option>
+          <option value="no_treaty">No treaty / Not applicable</option>
+        </select>
+      </div>
+      <div class="nav-row">
+        ${backBtn()}
+        <button class="btn btn-primary" id="qt1next">Continue →</button>
+      </div>`;
+    document.getElementById('qt1next').onclick = () => {
+      const v = document.getElementById('treatySelect').value;
+      if (!v) return;
+      if (v === 'no_treaty') {
+        state.treatyCountry = null;
+        // no treaty, just resident
+        if (state.dualStatusFlagged) { state.filingResult = 'dual'; go('relocation'); }
+        else { state.filingResult = 'ra'; go('result'); }
+      } else {
+        state.treatyCountry = v === 'other_treaty' ? 'treaty partner country' : v;
+        go('qt2');
+      }
+    };
+  };
+
+  steps.qt2 = () => {
+    const c = state.treatyCountry;
+    const isIsrael = c === 'Israel';
+    el.innerHTML = `
+      <div class="step-label">Treaty Tie-Breaker — Step 2</div>
+      <h2>Tie-Breaker Factors (${c})</h2>
+      <p>The treaty tie-breaker applies a cascade of tests. Answer each question:</p>
+      ${isIsrael ? '<div class="info-box blue"><strong>US-Israel Treaty — Article 3</strong>The US-Israel treaty contains specific residence tie-breaker rules in Article 3(2). The cascade below follows those provisions.</div>' : ''}
+
+      <div class="form-group">
+        <label>1. Where is your permanent home?</label>
+        <select id="tbHome">
+          <option value="">— Select —</option>
+          <option value="us">United States only</option>
+          <option value="other">${c} only</option>
+          <option value="both">Both countries</option>
+          <option value="neither">Neither country</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>2. Where is your center of vital interests (family, economic ties, social ties)?</label>
+        <select id="tbVital">
+          <option value="">— Select —</option>
+          <option value="us">Closer ties to the US</option>
+          <option value="other">Closer ties to ${c}</option>
+          <option value="equal">Equal / Cannot determine</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>3. Where is your habitual abode (where you spend more time)?</label>
+        <select id="tbAbode">
+          <option value="">— Select —</option>
+          <option value="us">United States</option>
+          <option value="other">${c}</option>
+          <option value="equal">Equal / Cannot determine</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>4. Of which country are you a citizen/national?</label>
+        <select id="tbCit">
+          <option value="">— Select —</option>
+          <option value="us">United States</option>
+          <option value="other">${c}</option>
+          <option value="both">Both</option>
+          <option value="neither">Neither</option>
+        </select>
+      </div>
+      <div class="nav-row">
+        ${backBtn()}
+        <button class="btn btn-primary" id="qt2next">Apply Tie-Breaker →</button>
+      </div>`;
+    document.getElementById('qt2next').onclick = () => {
+      state.treatyHome = document.getElementById('tbHome').value;
+      state.treatyVitalInterests = document.getElementById('tbVital').value;
+      state.treatyHabitualAbode = document.getElementById('tbAbode').value;
+      state.treatyCitizenship = document.getElementById('tbCit').value;
+
+      if (!state.treatyHome || !state.treatyVitalInterests || !state.treatyHabitualAbode || !state.treatyCitizenship) return;
+
+      // Apply cascade
+      state.treatyResult = applyTieBreaker();
+      go('qt3');
+    };
+  };
+
+  function applyTieBreaker() {
+    const h = state.treatyHome;
+    const v = state.treatyVitalInterests;
+    const a = state.treatyHabitualAbode;
+    const c = state.treatyCitizenship;
+
+    // 1. Permanent home
+    if (h === 'us') return 'us';
+    if (h === 'other') return 'other';
+    // both or neither → next test
+
+    // 2. Center of vital interests
+    if (v === 'us') return 'us';
+    if (v === 'other') return 'other';
+
+    // 3. Habitual abode
+    if (a === 'us') return 'us';
+    if (a === 'other') return 'other';
+
+    // 4. Citizenship
+    if (c === 'us') return 'us';
+    if (c === 'other') return 'other';
+
+    // 5. Mutual agreement needed
+    return 'mutual';
+  }
+
+  steps.qt3 = () => {
+    const r = state.treatyResult;
+    const c = state.treatyCountry;
+    const isIsrael = c === 'Israel';
+    const isGC = state.greenCard;
+
+    let resultHTML = '';
+    let explanation = '';
+
+    if (r === 'other') {
+      explanation = determineTieBreakerExplanation();
+      resultHTML = `
+        <div class="info-box green">
+          <strong>Treaty Resident of ${c}</strong>
+          Based on the tie-breaker analysis, you are treated as a resident of ${c} (not the US) for purposes of the ${c === 'Israel' ? 'US-Israel' : 'US-'+c} tax treaty.
+        </div>
+        <p style="margin-top:1rem">${explanation}</p>
+        <div class="result-section">
+          <h3>Filing Implications</h3>
+          <ul>
+            <li>File <strong>Form 1040-NR</strong> (Nonresident Alien) to report US-source income only</li>
+            <li>Must file <strong>Form 8833</strong> — Treaty-Based Return Position Disclosure</li>
+            <li>You lose certain benefits: standard deduction, filing jointly, some credits</li>
+          </ul>
+        </div>
+        ${isGC ? `
+        <div class="info-box red">
+          <strong>⚠ Critical: Green Card Holders — Immigration Consequences</strong>
+          Claiming treaty nonresident status as a green card holder may be treated as abandonment of your green card under IRC §7701(b)(6). This has serious immigration consequences:<br><br>
+          • USCIS may consider this evidence of abandoning your permanent resident status<br>
+          • You may be deemed to have surrendered your green card as of the first day of the tax year<br>
+          • If you were a long-term resident (8+ years), expatriation tax rules under IRC §877A may apply (Form 8854)<br><br>
+          <strong>This decision requires consultation with both a tax advisor and an immigration attorney before proceeding.</strong>
+        </div>` : ''}
+        ${isIsrael ? `
+        <div class="info-box orange">
+          <strong>US-Israel Treaty — Article 3 Notes</strong>
+          The US-Israel treaty tie-breaker under Article 3(2) follows the standard OECD cascade. Israel has a territorial-to-worldwide hybrid system. Ensure the position is supportable under both US and Israeli domestic law. Form 8833 must cite the specific article and paragraph relied upon.
+        </div>` : ''}`;
+      state.filingResult = 'treaty_nra';
+    } else if (r === 'us') {
+      explanation = determineTieBreakerExplanation();
+      resultHTML = `
+        <div class="info-box blue">
+          <strong>Treaty Tie-Breaker Confirms US Residency</strong>
+          Based on the tie-breaker analysis, you are treated as a US resident. The treaty does not change your filing status.
+        </div>
+        <p style="margin-top:1rem">${explanation}</p>`;
+      if (state.dualStatusFlagged) { state.filingResult = 'dual'; }
+      else { state.filingResult = 'ra'; }
+    } else {
+      // mutual agreement
+      resultHTML = `
+        <div class="info-box orange">
+          <strong>Competent Authority Determination Required</strong>
+          The tie-breaker cascade could not resolve your residence. Under the treaty, the competent authorities of the US and ${c} must determine your residence by mutual agreement. This is a complex process — consult your advisor.
+        </div>`;
+      state.filingResult = 'mutual';
+    }
+
+    el.innerHTML = `
+      <div class="step-label">Treaty Tie-Breaker — Result</div>
+      <h2>Tie-Breaker Analysis: ${c}</h2>
+      ${resultHTML}
+      <div class="nav-row">
+        ${backBtn()}
+        <button class="btn btn-primary" id="qt3next">${state.dualStatusFlagged && r !== 'other' ? 'View Relocation Guidance →' : 'View Final Result →'}</button>
+      </div>`;
+    document.getElementById('qt3next').onclick = () => {
+      if (state.dualStatusFlagged && state.filingResult === 'dual') go('relocation');
+      else go('result');
+    };
+  };
+
+  function determineTieBreakerExplanation() {
+    const h = state.treatyHome, v = state.treatyVitalInterests, a = state.treatyHabitualAbode, c = state.treatyCitizenship;
+    if (h === 'us' || h === 'other') {
+      const where = h === 'us' ? 'the US' : state.treatyCountry;
+      return `The tie-breaker was resolved at the first step: your permanent home is only in ${where}.`;
+    }
+    if (v === 'us' || v === 'other') {
+      const where = v === 'us' ? 'the US' : state.treatyCountry;
+      return `You have a permanent home in both countries (or neither). The tie-breaker moved to center of vital interests, which is closer to ${where}.`;
+    }
+    if (a === 'us' || a === 'other') {
+      const where = a === 'us' ? 'the US' : state.treatyCountry;
+      return `The permanent home and vital interests tests were inconclusive. The habitual abode test resolved it: you spend more time in ${where}.`;
+    }
+    if (c === 'us' || c === 'other') {
+      const where = c === 'us' ? 'the US' : state.treatyCountry;
+      return `The first three tests were inconclusive. The citizenship/nationality test resolved it: you are a citizen of ${where}.`;
+    }
+    return 'All four tiebreaker tests were inconclusive. Competent authority determination is required.';
+  }
+
+  // Relocation guidance
+  steps.relocation = () => {
+    el.innerHTML = `
+      <div class="step-label">Dual-Status — Relocation Guidance</div>
+      <h2>Common Relocation Scenarios</h2>
+      <p>Since a dual-status situation was identified, here is guidance for common scenarios:</p>
+
+      <div class="info-box blue" style="margin-top:1.25rem">
+        <strong>Moving TO the US Mid-Year</strong>
+        You are a nonresident alien (NRA) for the period before your first day of US presence, and a resident alien (RA) from your arrival onward.<br><br>
+        <em>Options:</em><br>
+        • <strong>Dual-status return:</strong> File 1040 for the RA period with a 1040-NR statement for the NRA period. No standard deduction available.<br>
+        • <strong>First-Year Election:</strong> If you meet the SPT the following year, elect to be treated as a full-year resident. File 1040 with standard deduction and worldwide income for the full year.<br>
+        • <strong>§6013(g) election:</strong> If married to a US citizen/resident, elect to file jointly as full-year residents.
+      </div>
+
+      <div class="info-box green" style="margin-top:1rem">
+        <strong>Moving FROM the US Mid-Year</strong>
+        Your residency ends on your last day of US presence (or last day you meet the SPT).<br><br>
+        File a dual-status return: 1040 for the RA period, with a 1040-NR statement for the NRA period after departure.
+      </div>
+
+      <div class="info-box orange" style="margin-top:1rem">
+        <strong>Green Card Surrender / Abandonment</strong>
+        If surrendering your green card (Form I-407), your residency ends on the date of surrender.<br><br>
+        <em>Expatriation rules:</em> If you were a long-term resident (held a green card for 8+ of the last 15 years), the expatriation tax rules under IRC §877A may apply. You must file <strong>Form 8854</strong> (Initial and Annual Expatriation Statement) and may be subject to a mark-to-market "exit tax" on unrealized gains.
+      </div>
+
+      <div class="nav-row">
+        ${backBtn()}
+        <button class="btn btn-primary" id="relNext">View Final Result →</button>
+      </div>`;
+    document.getElementById('relNext').onclick = () => go('result');
+  };
+
+  // ── Final Result ──
+  steps.result = () => {
+    const r = state.filingResult;
+    let html = `<div class="step-label">Final Result</div><h2>Filing Determination for ${currentYear}</h2>`;
+
+    if (r === 'citizen') {
+      html += renderResult({
+        status: 'Form 1040 — US Citizen',
+        tag: 'tag-green',
+        why: 'US citizenship — taxed on worldwide income regardless of residence',
+        forms: ['Form 1040 (US Individual Income Tax Return)'],
+        notes: [
+          'US citizens are taxed on worldwide income even if living abroad.',
+          '<strong>Foreign Earned Income Exclusion (FEIE):</strong> If you lived and worked abroad, you may qualify to exclude up to the annual limit of foreign earned income using Form 2555.',
+          '<strong>Foreign Tax Credit (FTC):</strong> Use Form 1116 to claim credits for income taxes paid to foreign governments, avoiding double taxation.',
+          'You must report all foreign financial accounts (FBAR / FinCEN 114) if aggregate balances exceed $10,000 at any time during the year.',
+          'FATCA reporting (Form 8938) may be required for specified foreign financial assets.'
+        ],
+        elections: []
+      });
+    } else if (r === 'ra') {
+      html += renderResult({
+        status: 'Form 1040 — Resident Alien (Full Year)',
+        tag: 'tag-green',
+        why: state.greenCard ? 'Green Card Test — lawful permanent resident for the full year' : 'Substantial Presence Test — met SPT and resident in prior years',
+        forms: ['Form 1040 (US Individual Income Tax Return)'],
+        notes: [
+          'You are taxed on worldwide income, same as a US citizen.',
+          'Eligible for standard deduction and all credits/deductions available to citizens.',
+          state.treatyCountry ? `Treaty with ${state.treatyCountry} was analyzed — tie-breaker confirms US residency.` : null,
+          'Report foreign accounts (FBAR) if aggregate balances exceed $10,000.',
+        ].filter(Boolean),
+        elections: []
+      });
+    } else if (r === 'nra') {
+      html += renderResult({
+        status: 'Form 1040-NR — Nonresident Alien',
+        tag: 'tag-blue',
+        why: 'Did not meet Green Card Test or Substantial Presence Test',
+        forms: ['Form 1040-NR (US Nonresident Alien Income Tax Return)'],
+        notes: [
+          'Taxed only on US-source income (and certain foreign-source income effectively connected with a US trade or business).',
+          'Not eligible for standard deduction (itemized deductions only, and limited).',
+          'Cannot file jointly (must use single or married filing separately).',
+          'Certain income (interest, dividends, rents) taxed at flat 30% rate (or reduced treaty rate).',
+          state.greenCard && !state.greenCardFullYear ? 'Note: You held a green card for part of the year — review dual-status option.' : null
+        ].filter(Boolean),
+        elections: []
+      });
+    } else if (r === 'dual') {
+      html += renderResult({
+        status: 'Dual-Status Return',
+        tag: 'tag-orange',
+        why: buildDualStatusWhy(),
+        forms: [
+          'Form 1040 (for the resident alien portion of the year)',
+          'Form 1040-NR statement (for the nonresident alien portion)',
+        ],
+        notes: [
+          'Standard deduction is <strong>not available</strong> on a dual-status return.',
+          'Cannot file jointly on a dual-status return (but see elections below).',
+          'For the RA period: taxed on worldwide income. For the NRA period: taxed only on US-source income.',
+          'Must clearly indicate "Dual-Status Return" on your filed return.',
+          state.greenCard && !state.greenCardFullYear ? 'Green card was held for only part of the year — residency dates are determined by the period the green card was held.' : null
+        ].filter(Boolean),
+        elections: [
+          '<strong>First-Year Election:</strong> If this is your first year meeting the SPT and you expect to meet it next year, you can elect to be treated as a full-year resident (file 1040 with standard deduction).',
+          '<strong>§6013(g) Election:</strong> If married to a US citizen or resident alien, you can elect to file jointly and be treated as a full-year resident.',
+        ],
+        dates: true
+      });
+    } else if (r === 'treaty_nra') {
+      html += renderResult({
+        status: 'Form 1040-NR with Treaty Position',
+        tag: 'tag-orange',
+        why: `Treaty tie-breaker under the US-${state.treatyCountry} treaty — treated as resident of ${state.treatyCountry}`,
+        forms: [
+          'Form 1040-NR (US Nonresident Alien Income Tax Return)',
+          'Form 8833 (Treaty-Based Return Position Disclosure)',
+          state.greenCard ? 'Form 8854 (if long-term resident expatriating)' : null
+        ].filter(Boolean),
+        notes: [
+          `You are claiming treaty benefits under the US-${state.treatyCountry} tax treaty to be treated as a nonresident for US tax purposes.`,
+          '<strong>Form 8833 is mandatory</strong> — failure to disclose the treaty position may result in penalties.',
+          'You lose the standard deduction, ability to file jointly, and certain credits.',
+          'Taxed only on US-source income (subject to treaty-reduced rates where applicable).',
+          state.greenCard ? '<strong>⚠ GREEN CARD ALERT:</strong> Claiming treaty nonresident status may be treated as abandoning your green card under IRC §7701(b)(6). Consult an immigration attorney.' : null,
+          state.greenCard ? 'If you are a long-term resident (green card for 8+ of last 15 years), IRC §877A expatriation tax rules may apply.' : null,
+        ].filter(Boolean),
+        elections: []
+      });
+    } else if (r === 'mutual') {
+      html += renderResult({
+        status: 'Competent Authority Determination Required',
+        tag: 'tag-red',
+        why: 'Treaty tie-breaker tests were inconclusive — requires mutual agreement between the US and ' + state.treatyCountry,
+        forms: ['To be determined pending competent authority decision'],
+        notes: [
+          'All four tie-breaker tests (permanent home, center of vital interests, habitual abode, citizenship) were inconclusive.',
+          'The competent authorities of the US (IRS) and ' + state.treatyCountry + ' must resolve your residence by mutual agreement.',
+          'This is a rare and complex situation — consult your advisor immediately.',
+          'In the interim, you may need to file protective returns in both countries.'
+        ],
+        elections: []
+      });
+    } else if (r === 'none') {
+      html += `
+        <div class="info-box blue" style="margin-top:1rem">
+          <strong>No US Filing Requirement Identified</strong>
+          Based on your answers, you did not meet the Green Card Test or Substantial Presence Test, and you had no US-source income. You likely do not have a US federal income tax filing requirement for ${currentYear}.
+        </div>
+        <div class="info-box yellow" style="margin-top:1rem">
+          <strong>However, consult your advisor.</strong>
+          There may be state-level requirements, FBAR obligations, or other situations not covered by this wizard that create a filing obligation.
+        </div>`;
+    }
+
+    html += `
+      <div class="btn-group" style="margin-top:2rem">
+        ${backBtn()}
+        <button class="btn btn-outline" onclick="window.print()">Print Result</button>
+        <button class="btn btn-secondary" onclick="wizStart()">Start Over</button>
+      </div>`;
+    el.innerHTML = html;
+  };
+
+  function buildDualStatusWhy() {
+    const parts = [];
+    if (state.greenCard && !state.greenCardFullYear) parts.push('Green card held for only part of the year');
+    if (state.firstYearSPT) parts.push('First year meeting the Substantial Presence Test');
+    if (!parts.length) parts.push('Part-year residency identified');
+    return parts.join('; ');
+  }
+
+  function renderResult({ status, tag, why, forms, notes, elections, dates }) {
+    let html = `
+      <div style="margin-top:1rem;margin-bottom:1.5rem">
+        <span class="tag ${tag}">${status}</span>
+      </div>
+
+      <div class="result-section">
+        <h3>Why This Determination</h3>
+        <p>${why}</p>
+      </div>`;
+
+    if (dates && state.firstYearSPT) {
+      html += `
+      <div class="result-section">
+        <h3>Key Dates</h3>
+        <ul>
+          <li><strong>Residency start date:</strong> First day of physical presence in the US in ${currentYear}</li>
+          <li><strong>NRA period:</strong> January 1 through the day before first US presence</li>
+          <li><strong>RA period:</strong> First day of US presence through December 31</li>
+        </ul>
+      </div>`;
+    }
+    if (dates && state.greenCard && !state.greenCardFullYear) {
+      html += `
+      <div class="result-section">
+        <h3>Key Dates</h3>
+        <ul>
+          <li><strong>Residency start/end:</strong> Determined by the dates the green card was held</li>
+          <li><strong>NRA period:</strong> Portion of the year without green card status</li>
+          <li><strong>RA period:</strong> Portion of the year with green card status</li>
+        </ul>
+      </div>`;
+    }
+
+    html += `
+      <div class="result-section">
+        <h3>Forms Needed</h3>
+        <ul>${forms.map(f => `<li>${f}</li>`).join('')}</ul>
+      </div>
+
+      <div class="result-section">
+        <h3>Important Notes</h3>
+        <ul>${notes.map(n => `<li>${n}</li>`).join('')}</ul>
+      </div>`;
+
+    if (elections && elections.length) {
+      html += `
+      <div class="result-section">
+        <h3>Available Elections</h3>
+        <ul>${elections.map(e => `<li>${e}</li>`).join('')}</ul>
+      </div>`;
+    }
+
+    return html;
+  }
+
+  // ── Init ──
+  render();
+})();
+</script>
+</body>
+</html>

@@ -10,6 +10,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .header { background: linear-gradient(135deg, #1a5276, #2980b9); color: white; padding: 3rem 1.5rem; text-align: center; }
 .header h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
 .header p { font-size: 1.1rem; opacity: 0.85; }
+.header .count { font-size: 0.9rem; opacity: 0.7; margin-top: 0.5rem; }
 .section-title { max-width: 800px; margin: 2rem auto 0.5rem; padding: 0 1.5rem; font-size: 0.85rem; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.06em; }
 .tools { max-width: 800px; margin: 0.5rem auto 0; padding: 0 1.5rem; display: grid; gap: 1rem; }
 .tool-card { background: white; border-radius: 12px; padding: 1.5rem 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; color: inherit; display: block; }
@@ -21,6 +22,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .badge-staff { background: #e8f4f8; color: #1a5276; }
 .badge-client { background: #f0fdf4; color: #16a34a; }
 .badge-new { background: #fef3c7; color: #d97706; }
+.badge-wizard { background: #f3e8ff; color: #7c3aed; }
 .footer { text-align: center; padding: 2rem; color: #999; font-size: 0.85rem; }
 </style>
 </head>
@@ -28,29 +30,26 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 <div class="header">
 <h1>🧰 PSA Tools</h1>
 <p>Philip Stein & Associates — Tax Calculators & Tools</p>
+<div class="count">9 tools available</div>
 </div>
 
-<div class="section-title">🔧 Staff Tools</div>
+<div class="section-title">📊 Calculators</div>
 <div class="tools">
 <a href="irs-penalty-calculator.html" class="tool-card">
 <h2>📋 IRS Interest & Penalty Calculator</h2>
-<p>Late filing/payment penalties, estimated tax underpayment (Form 2210), balance due interest, and international form penalty reference (5471, 5472, 3520, FBAR, 8938). Includes Israel terror relief adjustments.</p>
+<p>Late filing/payment penalties, estimated tax underpayment (Form 2210), balance due interest, and international form penalty reference. Includes Israel terror relief and lives-abroad adjustments.</p>
 <div class="badges"><span class="badge badge-staff">Staff Tool</span></div>
 </a>
 <a href="1042s-withholding-calculator.html" class="tool-card">
 <h2>📄 1042-S Withholding Calculator</h2>
 <p>NRA withholding on US-source income. Pre-loaded treaty rates for Israel, Canada, UK, and more. Gross-up calculator and treaty rate reference table.</p>
-<div class="badges"><span class="badge badge-staff">Staff Tool</span><span class="badge badge-new">New</span></div>
+<div class="badges"><span class="badge badge-staff">Staff Tool</span></div>
 </a>
 <a href="8804-partnership-withholding.html" class="tool-card">
 <h2>🏢 Partnership Withholding (8804/8805)</h2>
 <p>Section 1446 withholding on foreign partners' ECTI. Multi-partner support, installment schedule (8813), and underpayment penalty estimation.</p>
-<div class="badges"><span class="badge badge-staff">Staff Tool</span><span class="badge badge-new">New</span></div>
+<div class="badges"><span class="badge badge-staff">Staff Tool</span></div>
 </a>
-</div>
-
-<div class="section-title">👤 Staff + Client Tools</div>
-<div class="tools">
 <a href="retirement-contribution-calculator.html" class="tool-card">
 <h2>💰 401(k) & IRA Contribution Calculator</h2>
 <p>Contribution limits for 401(k), Traditional IRA, Roth IRA, SEP IRA, Solo 401(k), and SIMPLE IRA. Includes catch-up contributions, phase-outs, and US-Israel filer notes.</p>
@@ -59,12 +58,31 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 <a href="pension-9g-projection.html" class="tool-card">
 <h2>🏦 US Pension Tax Projection — Section 9(g)</h2>
 <p>Calculate federal tax on pension/IRA distributions as sole income. Generates the number needed for Israeli Section 9(g) exemption claims. Full bracket breakdown, printable summary.</p>
-<div class="badges"><span class="badge badge-staff">Staff Tool</span><span class="badge badge-client">Client Tool</span><span class="badge badge-new">New</span></div>
+<div class="badges"><span class="badge badge-staff">Staff Tool</span><span class="badge badge-client">Client Tool</span></div>
 </a>
 <a href="fbar-fatca-checker.html" class="tool-card">
 <h2>🌍 FBAR & FATCA Reporting Checker</h2>
-<p>Enter your foreign accounts and find out which reporting forms you need. Covers FBAR, FATCA (8938), PFIC flags, and Form 3520 triggers. Designed for clients — clear, friendly, educational.</p>
-<div class="badges"><span class="badge badge-client">Client Tool</span><span class="badge badge-new">New</span></div>
+<p>Enter your foreign accounts and find out which reporting forms you need. Covers FBAR, FATCA (8938), PFIC flags, and Form 3520 triggers.</p>
+<div class="badges"><span class="badge badge-client">Client Tool</span></div>
+</a>
+</div>
+
+<div class="section-title">🧭 Decision Wizards</div>
+<div class="tools">
+<a href="5471-category-finder.html" class="tool-card">
+<h2>🏛️ Form 5471 Category Finder</h2>
+<p>Answer a series of questions about your foreign corporation ownership and the tool tells you which 5471 categories apply, what schedules to file, and penalty exposure.</p>
+<div class="badges"><span class="badge badge-wizard">Wizard</span><span class="badge badge-staff">Staff Tool</span><span class="badge badge-new">New</span></div>
+</a>
+<a href="gift-filing-wizard.html" class="tool-card">
+<h2>🎁 Gift Tax & Foreign Gift Filing Wizard</h2>
+<p>Determine if you need Form 709 (US gift tax) or Form 3520 (foreign gifts received). Covers annual exclusion, lifetime exemption, non-citizen spouse rules, and foreign trust distributions.</p>
+<div class="badges"><span class="badge badge-wizard">Wizard</span><span class="badge badge-staff">Staff Tool</span><span class="badge badge-new">New</span></div>
+</a>
+<a href="residency-filing-wizard.html" class="tool-card">
+<h2>🛂 US Tax Residency & Filing Status Wizard</h2>
+<p>Should you file 1040, 1040-NR, or dual-status? Walks through citizenship, green card, Substantial Presence Test, first-year election, and treaty tie-breaker (including US-Israel Article 3).</p>
+<div class="badges"><span class="badge badge-wizard">Wizard</span><span class="badge badge-staff">Staff Tool</span><span class="badge badge-new">New</span></div>
 </a>
 </div>
 
