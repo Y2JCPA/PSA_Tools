@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IRS Interest &amp; Penalty Calculator — Philip Stein &amp; Associates</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue: #1a5276;
+  --blue-light: #2980b9;
+  --blue-pale: #eaf2f8;
+  --blue-border: #aed6f1;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-700: #374151;
+  --gray-900: #111827;
+  --red: #dc2626;
+  --red-bg: #fef2f2;
+  --green: #16a34a;
+  --green-bg: #f0fdf4;
+  --orange: #ea580c;
+  --orange-bg: #fff7ed;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--gray-100);
+  color: var(--gray-900);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  background: var(--blue);
+  color: #fff;
+  padding: 24px 20px;
+  text-align: center;
+}
+.header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.01em; }
+.header .subtitle { font-size: 0.85rem; opacity: 0.8; margin-top: 4px; }
+
+/* Container */
+.container { max-width: 960px; margin: 0 auto; padding: 20px 16px 40px; }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--gray-200);
+  margin-bottom: 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.tab-btn {
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--gray-500);
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color .15s, border-color .15s;
+}
+.tab-btn:hover { color: var(--blue); }
+.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Cards */
+.card {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.card h2 {
+  font-size: 1.1rem;
+  color: var(--blue);
+  margin-bottom: 4px;
+}
+.card .card-desc {
+  font-size: 0.82rem;
+  color: var(--gray-500);
+  margin-bottom: 20px;
+}
+
+/* Form grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 600px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
+.form-group { display: flex; flex-direction: column; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: 4px;
+}
+.form-group label .tip {
+  font-weight: 400;
+  color: var(--gray-400);
+  font-size: 0.75rem;
+}
+.form-group input, .form-group select {
+  padding: 8px 12px;
+  border: 1px solid var(--gray-300);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: var(--gray-900);
+  background: #fff;
+  transition: border-color .15s;
+}
+.form-group input:focus, .form-group select:focus {
+  outline: none;
+  border-color: var(--blue-light);
+  box-shadow: 0 0 0 3px rgba(41,128,185,.15);
+}
+
+/* Checkbox row */
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.checkbox-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); }
+.checkbox-row label { font-size: 0.82rem; color: var(--gray-700); margin-bottom: 0; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary:hover { background: var(--blue-light); }
+.btn-row { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* Results */
+.results { margin-top: 24px; }
+.results.hidden { display: none; }
+.result-card {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.result-card .rc-header {
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.rc-blue .rc-header { background: var(--blue-pale); color: var(--blue); }
+.rc-red .rc-header { background: var(--red-bg); color: var(--red); }
+.rc-green .rc-header { background: var(--green-bg); color: var(--green); }
+.rc-orange .rc-header { background: var(--orange-bg); color: var(--orange); }
+
+.result-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.result-table th, .result-table td { padding: 8px 16px; text-align: left; }
+.result-table th { font-weight: 600; color: var(--gray-500); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--gray-200); }
+.result-table td { border-bottom: 1px solid var(--gray-100); }
+.result-table tr:last-child td { border-bottom: none; }
+.result-table .total-row td { font-weight: 700; background: var(--gray-50); border-top: 2px solid var(--gray-200); }
+.result-table .text-right { text-align: right; }
+
+.summary-box {
+  background: var(--blue);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.summary-box .label { font-size: 0.9rem; opacity: 0.9; }
+.summary-box .amount { font-size: 1.4rem; font-weight: 700; }
+
+/* Estimated tax section */
+.quarter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+@media (max-width: 700px) {
+  .quarter-grid { grid-template-columns: 1fr 1fr; }
+}
+.quarter-box {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  padding: 12px;
+}
+.quarter-box .q-label { font-size: 0.78rem; font-weight: 600; color: var(--gray-500); margin-bottom: 6px; }
+.quarter-box input { width: 100%; }
+
+/* Reference table */
+.ref-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.ref-table th { background: var(--blue); color: #fff; padding: 10px 14px; text-align: left; font-size: 0.8rem; font-weight: 600; }
+.ref-table td { padding: 12px 14px; border-bottom: 1px solid var(--gray-200); vertical-align: top; }
+.ref-table tr:last-child td { border-bottom: none; }
+.ref-table tr:nth-child(even) { background: var(--gray-50); }
+.ref-table .form-name { font-weight: 600; color: var(--blue); white-space: nowrap; }
+.ref-table .penalty-amt { font-weight: 600; color: var(--red); }
+
+/* Disclaimer */
+.disclaimer {
+  margin-top: 32px;
+  padding: 16px;
+  background: var(--orange-bg);
+  border: 1px solid #fed7aa;
+  border-radius: var(--radius);
+  font-size: 0.8rem;
+  color: var(--orange);
+  line-height: 1.6;
+}
+
+/* Print */
+@media print {
+  body { background: #fff; }
+  .header { padding: 12px; }
+  .tabs, .btn-row, .form-grid, .form-group, .checkbox-row { display: none !important; }
+  .tab-content { display: block !important; }
+  .results { display: block !important; }
+  .results.hidden { display: none !important; }
+  .card { box-shadow: none; border: 1px solid var(--gray-200); break-inside: avoid; }
+}
+
+/* Tooltip */
+.has-tip { position: relative; cursor: help; border-bottom: 1px dotted var(--gray-400); }
+.has-tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gray-900);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 400;
+  padding: 6px 10px;
+  border-radius: 4px;
+  white-space: normal;
+  width: 240px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s;
+  z-index: 10;
+  line-height: 1.4;
+}
+.has-tip:hover::after { opacity: 1; }
+
+/* Responsive table wrapper */
+.table-wrap { overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>IRS Interest &amp; Penalty Calculator</h1>
+  <div class="subtitle">Philip Stein &amp; Associates — Internal Tool</div>
+</div>
+
+<div class="container">
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" data-tab="filing" role="tab">Late Filing &amp; Payment</button>
+    <button class="tab-btn" data-tab="estimated" role="tab">Estimated Tax (2210)</button>
+    <button class="tab-btn" data-tab="balance" role="tab">Balance Due Interest</button>
+    <button class="tab-btn" data-tab="intl" role="tab">International Penalties</button>
+  </div>
+
+  <!-- ===== SECTION 1: Late Filing & Payment ===== -->
+  <div id="tab-filing" class="tab-content active">
+    <div class="card">
+      <h2>Late Filing &amp; Late Payment Penalties</h2>
+      <p class="card-desc">Form 1040 — Failure-to-file and failure-to-pay penalty computation</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Tax Due Amount ($)</label>
+          <input type="number" id="f1-tax" min="0" step="0.01" placeholder="e.g. 5000">
+        </div>
+        <div class="form-group">
+          <label>Original Due Date <span class="tip">(usually Apr 15)</span></label>
+          <input type="date" id="f1-due" value="2025-04-15">
+        </div>
+        <div class="form-group">
+          <label>Date Filed</label>
+          <input type="date" id="f1-filed">
+        </div>
+        <div class="form-group">
+          <label>Date Paid</label>
+          <input type="date" id="f1-paid">
+        </div>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="f1-installment">
+        <label for="f1-installment"><span class="has-tip" data-tip="If you have an approved IRS installment agreement, the failure-to-pay rate drops from 0.5% to 0.25% per month.">Installment agreement in place</span></label>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="f1-notice">
+        <label for="f1-notice"><span class="has-tip" data-tip="If the IRS has issued a notice of intent to levy and 10 days have passed, the failure-to-pay rate increases from 0.5% to 1% per month.">IRS notice + 10 days elapsed</span></label>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="calcFiling()">Calculate Penalties</button>
+      </div>
+      <div id="f1-results" class="results hidden"></div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 2: Estimated Tax ===== -->
+  <div id="tab-estimated" class="tab-content">
+    <div class="card">
+      <h2>Underpayment of Estimated Tax</h2>
+      <p class="card-desc">Form 2210 — Estimated tax penalty for individuals</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Tax Year</label>
+          <select id="f2-year">
+            <option value="2025" selected>2025</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Total Tax Liability (current year)</label>
+          <input type="number" id="f2-liability" min="0" step="0.01" placeholder="e.g. 30000">
+        </div>
+        <div class="form-group">
+          <label>Prior Year Tax Liability</label>
+          <input type="number" id="f2-prior" min="0" step="0.01" placeholder="e.g. 25000">
+        </div>
+        <div class="form-group">
+          <label>Withholding (W-2 / 1099)</label>
+          <input type="number" id="f2-withholding" min="0" step="0.01" value="0">
+        </div>
+        <div class="form-group full">
+          <div class="checkbox-row" style="margin-top:0">
+            <input type="checkbox" id="f2-highagi">
+            <label for="f2-highagi"><span class="has-tip" data-tip="If your AGI exceeds $150,000 ($75,000 MFS), the safe harbor for prior year tax is 110% instead of 100%.">AGI &gt; $150,000</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="form-group full" style="margin-top:12px">
+        <label style="font-size:.85rem;font-weight:600;color:var(--gray-700);margin-bottom:8px;">Estimated Tax Payments</label>
+      </div>
+      <div class="quarter-grid">
+        <div class="quarter-box">
+          <div class="q-label">Q1 (Apr 15)</div>
+          <input type="number" id="f2-q1" min="0" step="0.01" value="0" placeholder="$0">
+        </div>
+        <div class="quarter-box">
+          <div class="q-label">Q2 (Jun 15)</div>
+          <input type="number" id="f2-q2" min="0" step="0.01" value="0" placeholder="$0">
+        </div>
+        <div class="quarter-box">
+          <div class="q-label">Q3 (Sep 15)</div>
+          <input type="number" id="f2-q3" min="0" step="0.01" value="0" placeholder="$0">
+        </div>
+        <div class="quarter-box">
+          <div class="q-label">Q4 (Jan 15)</div>
+          <input type="number" id="f2-q4" min="0" step="0.01" value="0" placeholder="$0">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="calcEstimated()">Calculate Penalty</button>
+      </div>
+      <div id="f2-results" class="results hidden"></div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 3: Balance Due Interest ===== -->
+  <div id="tab-balance" class="tab-content">
+    <div class="card">
+      <h2>Underpayment Interest on Balance Due</h2>
+      <p class="card-desc">Daily compounding interest at the federal short-term rate + 3%</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Balance Due ($)</label>
+          <input type="number" id="f3-balance" min="0" step="0.01" placeholder="e.g. 10000">
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="date" id="f3-due" value="2025-04-15">
+        </div>
+        <div class="form-group">
+          <label>Payment Date</label>
+          <input type="date" id="f3-paid">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="calcBalance()">Calculate Interest</button>
+      </div>
+      <div id="f3-results" class="results hidden"></div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 4: International Penalties ===== -->
+  <div id="tab-intl" class="tab-content">
+    <div class="card">
+      <h2>International Penalty Reference</h2>
+      <p class="card-desc">Common penalties for foreign information returns — for reference only</p>
+      <div class="table-wrap">
+        <table class="ref-table">
+          <thead>
+            <tr><th>Form</th><th>Description</th><th>Penalty</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="form-name">Form 5471</td>
+              <td>Information Return of U.S. Persons with Respect to Certain Foreign Corporations</td>
+              <td><span class="penalty-amt">$10,000</span> per form per year. Additional $10,000 for each 30-day period of continued non-compliance after IRS notice, up to a maximum additional penalty of <span class="penalty-amt">$50,000</span>.</td>
+            </tr>
+            <tr>
+              <td class="form-name">Form 5472</td>
+              <td>Information Return of a 25% Foreign-Owned U.S. Corporation or Foreign Corporation Engaged in a U.S. Trade or Business</td>
+              <td><span class="penalty-amt">$25,000</span> per form per year. Additional $25,000 for each 30-day period after IRS notice of continued non-compliance.</td>
+            </tr>
+            <tr>
+              <td class="form-name">Form 3520</td>
+              <td>Annual Return to Report Transactions with Foreign Trusts and Receipt of Certain Foreign Gifts</td>
+              <td><strong>Foreign trusts:</strong> <span class="penalty-amt">35%</span> of gross value of property transferred to a foreign trust; 35% of gross distributions received from a foreign trust; 5% of gross value of trust corpus if information return not filed.<br><strong>Foreign gifts:</strong> <span class="penalty-amt">5%</span> of gift amount per month (or part), up to 25%.</td>
+            </tr>
+            <tr>
+              <td class="form-name">FBAR<br>(FinCEN 114)</td>
+              <td>Report of Foreign Bank and Financial Accounts</td>
+              <td><strong>Non-willful:</strong> Up to <span class="penalty-amt">$16,117</span> per violation (2025, adjusted annually).<br><strong>Willful:</strong> Greater of <span class="penalty-amt">$161,170</span> or <span class="penalty-amt">50%</span> of account balance per violation.</td>
+            </tr>
+            <tr>
+              <td class="form-name">Form 8938<br>(FATCA)</td>
+              <td>Statement of Specified Foreign Financial Assets</td>
+              <td><span class="penalty-amt">$10,000</span> failure-to-file penalty. Additional $10,000 for each 30-day period after IRS notice, up to <span class="penalty-amt">$60,000</span>. Plus <span class="penalty-amt">40%</span> accuracy-related penalty on any underpayment attributable to undisclosed foreign financial assets.</td>
+            </tr>
+            <tr>
+              <td class="form-name">Form 8865</td>
+              <td>Return of U.S. Persons with Respect to Certain Foreign Partnerships</td>
+              <td><span class="penalty-amt">$10,000</span> per form per year. Additional $10,000 for each 30-day period of continued non-compliance after IRS notice, up to <span class="penalty-amt">$50,000</span>.</td>
+            </tr>
+            <tr>
+              <td class="form-name">Form 926</td>
+              <td>Return by a U.S. Transferor of Property to a Foreign Corporation</td>
+              <td><span class="penalty-amt">10%</span> of the value of property transferred, up to a maximum of <span class="penalty-amt">$100,000</span>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>Disclaimer:</strong> This calculator provides estimates only. Actual IRS calculations may differ due to rounding, partial-month rules, and other factors. Consult your tax advisor for precise figures. Interest rates shown are for individual non-corporate taxpayers.
+  </div>
+</div>
+
+<script>
+// ===== IRS Quarterly Interest Rates (individual underpayment = short-term AFR + 3%) =====
+const IRS_RATES = {
+  '2023-1': 7, '2023-2': 7, '2023-3': 7, '2023-4': 8,
+  '2024-1': 8, '2024-2': 8, '2024-3': 8, '2024-4': 8,
+  '2025-1': 7, '2025-2': 7, '2025-3': 7, '2025-4': 7,
+  '2026-1': 7, '2026-2': 7, '2026-3': 7, '2026-4': 7,
+};
+const DEFAULT_RATE = 7;
+
+function getQuarterlyRate(date) {
+  const y = date.getFullYear();
+  const m = date.getMonth() + 1;
+  const q = m <= 3 ? 1 : m <= 6 ? 2 : m <= 9 ? 3 : 4;
+  return (IRS_RATES[y + '-' + q] ?? DEFAULT_RATE);
+}
+
+function getDailyRate(date) {
+  return getQuarterlyRate(date) / 100 / 365;
+}
+
+function fmt(n) {
+  return n.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+}
+
+function daysBetween(a, b) {
+  return Math.round((b - a) / 86400000);
+}
+
+function monthsBetween(start, end) {
+  // Count full and partial months per IRS rules (each partial month counts as full month)
+  if (end <= start) return 0;
+  let months = 0;
+  let cursor = new Date(start);
+  while (cursor < end) {
+    months++;
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  return months;
+}
+
+function parseDate(id) {
+  const v = document.getElementById(id).value;
+  return v ? new Date(v + 'T00:00:00') : null;
+}
+
+function parseNum(id) {
+  return parseFloat(document.getElementById(id).value) || 0;
+}
+
+// ===== Tab Navigation =====
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ===== SECTION 1: Late Filing & Payment =====
+function calcFiling() {
+  const tax = parseNum('f1-tax');
+  const due = parseDate('f1-due');
+  const filed = parseDate('f1-filed');
+  const paid = parseDate('f1-paid');
+  const installment = document.getElementById('f1-installment').checked;
+  const notice = document.getElementById('f1-notice').checked;
+  const el = document.getElementById('f1-results');
+
+  if (!tax || !due || !filed || !paid) {
+    el.innerHTML = '<p style="color:var(--red);margin-top:12px;">Please fill in all fields.</p>';
+    el.classList.remove('hidden');
+    return;
+  }
+
+  // Months late for filing
+  const fileMonths = monthsBetween(due, filed);
+  // Months late for paying
+  const payMonths = monthsBetween(due, paid);
+
+  // Failure-to-pay rate
+  let ftpRatePerMonth = 0.005; // 0.5%
+  if (notice) ftpRatePerMonth = 0.01;  // 1% after notice
+  if (installment) ftpRatePerMonth = 0.0025; // 0.25% with installment agreement
+
+  // Failure-to-pay penalty
+  let ftpPenalty = 0;
+  if (payMonths > 0) {
+    ftpPenalty = Math.min(payMonths * ftpRatePerMonth, 0.25) * tax;
+  }
+
+  // Failure-to-file penalty
+  let ftfPenalty = 0;
+  let ftfMonths = fileMonths;
+  // FTF is 5% per month, but reduced by FTP when both run concurrently
+  if (ftfMonths > 0) {
+    // Months where both FTF and FTP overlap
+    const overlapMonths = Math.min(ftfMonths, payMonths);
+    const ftfOnlyMonths = ftfMonths - overlapMonths;
+
+    // During overlap: FTF net rate = 5% - FTP rate per month
+    const netFtfRate = 0.05 - ftpRatePerMonth;
+    let ftfRate = overlapMonths * netFtfRate + ftfOnlyMonths * 0.05;
+    ftfRate = Math.min(ftfRate, 0.25 - (installment ? 0 : 0)); // FTF max 25% total (but this is the gross, we need net)
+
+    // Actually: max gross FTF is 25%. The reduction is applied after.
+    // IRS rule: gross FTF = min(months * 5%, 25%). Then net FTF = gross FTF - FTP during overlap.
+    let grossFtf = Math.min(ftfMonths * 0.05, 0.25) * tax;
+    let ftpDuringOverlap = Math.min(overlapMonths * ftpRatePerMonth, 0.25) * tax;
+    // But we can't reduce more than the FTF itself
+    ftfPenalty = Math.max(grossFtf - ftpDuringOverlap, 0);
+
+    // Minimum penalty: if >60 days late, min penalty = lesser of $510 or 100% of tax
+    const daysLate = daysBetween(due, filed);
+    if (daysLate > 60) {
+      const minPenalty = Math.min(510, tax);
+      ftfPenalty = Math.max(ftfPenalty, minPenalty);
+    }
+  }
+
+  // Recalculate FTP independently for display (not reduced)
+  let ftpDisplay = ftpPenalty;
+
+  const total = ftfPenalty + ftpDisplay;
+
+  let html = '';
+
+  // FTF detail
+  html += `<div class="result-card rc-red">
+    <div class="rc-header">Failure-to-File Penalty (IRC &sect;6651(a)(1))</div>
+    <table class="result-table"><tbody>
+      <tr><td>Months late (filing)</td><td class="text-right">${fileMonths}</td></tr>
+      <tr><td>Gross rate</td><td class="text-right">${Math.min(fileMonths * 5, 25)}% (5% &times; ${fileMonths}, max 25%)</td></tr>
+      <tr><td>Less: concurrent FTP reduction</td><td class="text-right">&minus;${(Math.min(Math.min(fileMonths, payMonths) * ftpRatePerMonth * 100, 25)).toFixed(2)}%</td></tr>
+      ${fileMonths > 0 && daysBetween(due, filed) > 60 ? `<tr><td>Minimum penalty (&gt;60 days late)</td><td class="text-right">${fmt(Math.min(510, tax))}</td></tr>` : ''}
+      <tr class="total-row"><td>Failure-to-File Penalty</td><td class="text-right">${fmt(ftfPenalty)}</td></tr>
+    </tbody></table>
+  </div>`;
+
+  // FTP detail
+  html += `<div class="result-card rc-orange">
+    <div class="rc-header">Failure-to-Pay Penalty (IRC &sect;6651(a)(2))</div>
+    <table class="result-table"><tbody>
+      <tr><td>Months late (payment)</td><td class="text-right">${payMonths}</td></tr>
+      <tr><td>Rate per month</td><td class="text-right">${(ftpRatePerMonth * 100).toFixed(2)}%${installment ? ' (installment)' : notice ? ' (post-notice)' : ''}</td></tr>
+      <tr><td>Effective rate</td><td class="text-right">${Math.min(payMonths * ftpRatePerMonth * 100, 25).toFixed(2)}% (max 25%)</td></tr>
+      <tr class="total-row"><td>Failure-to-Pay Penalty</td><td class="text-right">${fmt(ftpDisplay)}</td></tr>
+    </tbody></table>
+  </div>`;
+
+  // Summary
+  html += `<div class="summary-box">
+    <div>
+      <div class="label">Total Penalties (Filing + Payment)</div>
+      <div style="font-size:.78rem;opacity:.7;margin-top:2px;">Tax due: ${fmt(tax)}</div>
+    </div>
+    <div class="amount">${fmt(total)}</div>
+  </div>`;
+
+  el.innerHTML = html;
+  el.classList.remove('hidden');
+}
+
+// ===== SECTION 2: Estimated Tax =====
+function calcEstimated() {
+  const year = parseInt(document.getElementById('f2-year').value);
+  const liability = parseNum('f2-liability');
+  const prior = parseNum('f2-prior');
+  const withholding = parseNum('f2-withholding');
+  const highAgi = document.getElementById('f2-highagi').checked;
+  const q1pay = parseNum('f2-q1');
+  const q2pay = parseNum('f2-q2');
+  const q3pay = parseNum('f2-q3');
+  const q4pay = parseNum('f2-q4');
+  const el = document.getElementById('f2-results');
+
+  if (!liability) {
+    el.innerHTML = '<p style="color:var(--red);margin-top:12px;">Please enter tax liability.</p>';
+    el.classList.remove('hidden');
+    return;
+  }
+
+  // Required annual payment
+  const safeHarborPrior = highAgi ? prior * 1.10 : prior;
+  const safeHarborCurrent = liability * 0.90;
+  const requiredAnnual = prior > 0 ? Math.min(safeHarborCurrent, safeHarborPrior) : safeHarborCurrent;
+  const requiredQuarterly = requiredAnnual / 4;
+
+  // Withholding allocated equally across quarters
+  const whPerQ = withholding / 4;
+
+  // Quarter due dates and deadlines (payment due -> next quarter start for interest calc)
+  const qDates = [
+    { label: 'Q1', due: new Date(year, 3, 15), end: new Date(year, 5, 15) },
+    { label: 'Q2', due: new Date(year, 5, 15), end: new Date(year, 8, 15) },
+    { label: 'Q3', due: new Date(year, 8, 15), end: new Date(year + 1, 0, 15) },
+    { label: 'Q4', due: new Date(year + 1, 0, 15), end: new Date(year + 1, 3, 15) },
+  ];
+  const payments = [q1pay, q2pay, q3pay, q4pay];
+
+  let totalPenalty = 0;
+  let rows = '';
+  let carryover = 0; // overpayment carried to next quarter
+
+  for (let i = 0; i < 4; i++) {
+    const totalPaid = payments[i] + whPerQ + carryover;
+    const underpayment = Math.max(requiredQuarterly - totalPaid, 0);
+    carryover = Math.max(totalPaid - requiredQuarterly, 0);
+
+    let interest = 0;
+    if (underpayment > 0) {
+      // Calculate interest from due date to end date using daily compounding
+      const startDate = qDates[i].due;
+      const endDate = qDates[i].end;
+      let balance = underpayment;
+      let d = new Date(startDate);
+      while (d < endDate) {
+        const dailyRate = getDailyRate(d);
+        balance += balance * dailyRate;
+        d.setDate(d.getDate() + 1);
+      }
+      interest = balance - underpayment;
+    }
+
+    totalPenalty += interest;
+    rows += `<tr>
+      <td>${qDates[i].label}</td>
+      <td class="text-right">${fmt(requiredQuarterly)}</td>
+      <td class="text-right">${fmt(payments[i] + whPerQ + (i === 0 ? 0 : Math.max(payments[i-1] + whPerQ - requiredQuarterly, 0)))}</td>
+      <td class="text-right">${fmt(underpayment)}</td>
+      <td class="text-right">${getQuarterlyRate(qDates[i].due)}%</td>
+      <td class="text-right">${fmt(interest)}</td>
+    </tr>`;
+  }
+
+  let html = `<div class="result-card rc-blue">
+    <div class="rc-header">Estimated Tax Underpayment Calculation</div>
+    <table class="result-table">
+      <thead><tr>
+        <th>Quarter</th><th class="text-right">Required</th><th class="text-right">Paid + W/H</th>
+        <th class="text-right">Underpayment</th><th class="text-right">Rate</th><th class="text-right">Interest</th>
+      </tr></thead>
+      <tbody>${rows}
+        <tr class="total-row"><td colspan="5">Total Estimated Tax Penalty</td><td class="text-right">${fmt(totalPenalty)}</td></tr>
+      </tbody>
+    </table>
+  </div>`;
+
+  html += `<div style="font-size:.82rem;color:var(--gray-500);margin-top:8px;">
+    Required annual payment: ${fmt(requiredAnnual)} (lesser of ${fmt(safeHarborCurrent)} [90% current] or ${fmt(safeHarborPrior)} [${highAgi ? '110%' : '100%'} prior year])
+    &bull; Withholding credited: ${fmt(whPerQ)}/quarter
+  </div>`;
+
+  html += `<div class="summary-box">
+    <div class="label">Total Form 2210 Penalty</div>
+    <div class="amount">${fmt(totalPenalty)}</div>
+  </div>`;
+
+  el.innerHTML = html;
+  el.classList.remove('hidden');
+}
+
+// ===== SECTION 3: Balance Due Interest =====
+function calcBalance() {
+  const balance = parseNum('f3-balance');
+  const due = parseDate('f3-due');
+  const paid = parseDate('f3-paid');
+  const el = document.getElementById('f3-results');
+
+  if (!balance || !due || !paid) {
+    el.innerHTML = '<p style="color:var(--red);margin-top:12px;">Please fill in all fields.</p>';
+    el.classList.remove('hidden');
+    return;
+  }
+
+  if (paid <= due) {
+    el.innerHTML = '<p style="color:var(--green);margin-top:12px;">No interest — payment was on or before the due date.</p>';
+    el.classList.remove('hidden');
+    return;
+  }
+
+  const totalDays = daysBetween(due, paid);
+
+  // Daily compounding, track by quarter periods for display
+  let principal = balance;
+  let totalInterest = 0;
+  let rows = '';
+  let d = new Date(due);
+  let periodStart = new Date(d);
+  let periodRate = getQuarterlyRate(d);
+  let periodInterest = 0;
+  let periodDays = 0;
+
+  while (d < paid) {
+    const currentRate = getQuarterlyRate(d);
+    if (currentRate !== periodRate && periodDays > 0) {
+      // Output period row
+      rows += `<tr>
+        <td>${periodStart.toLocaleDateString('en-US')} – ${new Date(d - 86400000).toLocaleDateString('en-US')}</td>
+        <td class="text-right">${periodDays}</td>
+        <td class="text-right">${periodRate}%</td>
+        <td class="text-right">${fmt(periodInterest)}</td>
+      </tr>`;
+      periodStart = new Date(d);
+      periodRate = currentRate;
+      periodInterest = 0;
+      periodDays = 0;
+    }
+
+    const dailyRate = currentRate / 100 / 365;
+    const dayInterest = principal * dailyRate;
+    principal += dayInterest;
+    totalInterest += dayInterest;
+    periodInterest += dayInterest;
+    periodDays++;
+    d.setDate(d.getDate() + 1);
+  }
+
+  // Final period
+  if (periodDays > 0) {
+    rows += `<tr>
+      <td>${periodStart.toLocaleDateString('en-US')} – ${new Date(paid - 86400000).toLocaleDateString('en-US')}</td>
+      <td class="text-right">${periodDays}</td>
+      <td class="text-right">${periodRate}%</td>
+      <td class="text-right">${fmt(periodInterest)}</td>
+    </tr>`;
+  }
+
+  let html = `<div class="result-card rc-blue">
+    <div class="rc-header">Interest Accrual — Daily Compounding</div>
+    <table class="result-table">
+      <thead><tr>
+        <th>Period</th><th class="text-right">Days</th><th class="text-right">Annual Rate</th><th class="text-right">Interest</th>
+      </tr></thead>
+      <tbody>${rows}
+        <tr class="total-row">
+          <td>Total (${totalDays} days)</td><td></td><td></td>
+          <td class="text-right">${fmt(totalInterest)}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>`;
+
+  html += `<div class="summary-box">
+    <div>
+      <div class="label">Total Amount Due (Principal + Interest)</div>
+      <div style="font-size:.78rem;opacity:.7;margin-top:2px;">Principal: ${fmt(balance)} &bull; Interest: ${fmt(totalInterest)}</div>
+    </div>
+    <div class="amount">${fmt(balance + totalInterest)}</div>
+  </div>`;
+
+  el.innerHTML = html;
+  el.classList.remove('hidden');
+}
+</script>
+</body>
+</html>
