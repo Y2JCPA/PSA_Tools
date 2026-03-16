@@ -815,18 +815,22 @@ function calculate() {
   if (isSE && seIncome > 0 && sePlanType === 'sep') {
     document.getElementById('cardSEP').classList.remove('hidden');
     document.getElementById('cardSolo401k').classList.add('hidden');
-    // SEP: 25% of net SE income after 1/2 SE tax deduction
+    // SEP: For self-employed, the effective contribution rate is 20% (not 25%).
+    // This is because the SEP contribution is itself a deduction from earned income,
+    // creating a circular calculation. The IRS resolves this: 25% / 1.25 = 20%.
+    // 25% applies only to W-2 employees of a business.
     var seTax = seIncome * 0.9235 * 0.153;
     var adjustedSE = seIncome - (seTax / 2);
-    var sepContrib = Math.min(adjustedSE * 0.25, L.sepMax);
+    var sepContrib = Math.min(adjustedSE * 0.20, L.sepMax);
     sepContrib = Math.max(0, sepContrib);
 
     var htmlSEP = row('Net Self-Employment Income', fmt(seIncome));
     htmlSEP += row('Adjusted for ½ SE Tax', fmt(adjustedSE));
-    htmlSEP += row('25% of Adjusted Income', fmt(adjustedSE * 0.25));
+    htmlSEP += row('Effective SE Rate (25% ÷ 1.25)', '20%');
+    htmlSEP += row('20% of Adjusted Income', fmt(adjustedSE * 0.20));
     htmlSEP += row('Annual Maximum', fmt(L.sepMax));
     htmlSEP += row('<strong>Your SEP IRA Limit</strong>', '<strong>' + fmt(sepContrib) + '</strong>');
-    htmlSEP += noteBox('SEP IRA contributions are made by the employer (you, as self-employed). These do not reduce your Traditional/Roth IRA limits but do count toward the overall annual additions limit.');
+    htmlSEP += noteBox('For self-employed individuals, the effective SEP contribution rate is 20% (not 25%). The 25% rate applies to W-2 employees. The reduced rate accounts for the circular deduction: the SEP contribution itself reduces your earned income. SEP IRA contributions do not reduce your Traditional/Roth IRA limits but do count toward the overall annual additions limit.');
 
     document.getElementById('bodySEP').innerHTML = htmlSEP;
     document.getElementById('badgeSEP').textContent = 'Eligible';
@@ -840,7 +844,7 @@ function calculate() {
     var employeeDeferral = max401k; // same as regular 401(k) deferral limits
     var seTax = seIncome * 0.9235 * 0.153;
     var adjustedSE = seIncome - (seTax / 2);
-    var employerContrib = Math.min(adjustedSE * 0.25, L.sepMax);
+    var employerContrib = Math.min(adjustedSE * 0.20, L.sepMax); // 20% effective rate for SE
     employerContrib = Math.max(0, employerContrib);
     var solo401kTotal = Math.min(employeeDeferral + employerContrib, L.totalLimit401k);
 
